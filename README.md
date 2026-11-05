@@ -59,7 +59,8 @@ iot-project-longsor/
 |-- edge-gateway/    # (tahap berikutnya) skrip Python / Raspberry Pi
 |-- backend-api/     # (tahap berikutnya) FastAPI, subscriber MQTT, skema DB
 |-- docker/          # (tahap berikutnya) docker-compose.yml
-|-- docs/            # demo, proposal, arsitektur, threat model
+|-- labs/minggu-01/  # Praktikum 1: ESP32 + DHT22, blocking vs non-blocking
+|-- docs/            # demo, laporan praktikum, proposal, arsitektur, threat model
 `-- README.md
 ```
 
