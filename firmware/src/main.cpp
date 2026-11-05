@@ -20,6 +20,7 @@ static Ambang ambang;
 static PenilaiStatus penilai;
 
 static float soilPct = 0, rainPct = 0, tiltDeltaDeg = 0;
+static int soilRaw = 0, rainRaw = 0;   // ADC mentah, untuk kalibrasi sensor asli
 static float fax = 0, fay = 0, faz = 1;          // percepatan terfilter (g)
 static float bx = 0, by = 0, bz = 1;             // vektor baseline
 static bool  filterSiap = false;
@@ -133,6 +134,8 @@ static void kirimTelemetri(Status s, unsigned long now) {
   doc["soil_pct"]       = bulat1(soilPct);
   doc["rain_pct"]       = bulat1(rainPct);
   doc["tilt_delta_deg"] = bulat1(tiltDeltaDeg);
+  doc["soil_raw"]       = soilRaw;   // dipakai untuk mengisi *_RAW_KERING / *_RAW_BASAH
+  doc["rain_raw"]       = rainRaw;
   doc["alert"]          = (s == Status::BAHAYA);
   serializeJson(doc, Serial);
   Serial.println();
@@ -193,8 +196,10 @@ void loop() {
   if (now - tSensor >= INTERVAL_SENSOR_MS) {
     tSensor = now;
 
-    const float sPct = persenDariRaw(analogRead(PIN_SOIL), SOIL_RAW_KERING, SOIL_RAW_BASAH);
-    const float rPct = persenDariRaw(analogRead(PIN_RAIN), RAIN_RAW_KERING, RAIN_RAW_BASAH);
+    soilRaw = analogRead(PIN_SOIL);
+    rainRaw = analogRead(PIN_RAIN);
+    const float sPct = persenDariRaw(soilRaw, SOIL_RAW_KERING, SOIL_RAW_BASAH);
+    const float rPct = persenDariRaw(rainRaw, RAIN_RAW_KERING, RAIN_RAW_BASAH);
     soilPct = ALFA_FILTER * sPct + (1.0f - ALFA_FILTER) * soilPct;
     rainPct = ALFA_FILTER * rPct + (1.0f - ALFA_FILTER) * rainPct;
 

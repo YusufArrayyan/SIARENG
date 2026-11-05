@@ -45,6 +45,12 @@ cd firmware/test_host
 g++ -std=c++17 -Wall -Wextra -I../include test_logic.cpp -o test_logic && ./test_logic
 ```
 
+## Merakit alat asli
+
+Panduan lengkap dari breadboard sampai terpasang di lereng (catu daya surya, box IP65, kalibrasi):
+[`docs/panduan-perakitan.md`](docs/panduan-perakitan.md). Anggaran ada di `docs/RAB_SIARENG.xlsx`
+(lengkap) dan `docs/RAB_SIARENG_hemat.xlsx` (uji prototipe).
+
 ## Beralih ke sensor asli
 
 Di `firmware/include/config.h`: ubah `SIMULASI` ke `0`, isi nilai `*_RAW_KERING` dan `*_RAW_BASAH`
