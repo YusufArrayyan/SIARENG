@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "author": "Muhammad Yusuf Arrayyan - Teknologi IoT Informatika UNIB",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-mpu6050", "id": "mpu1", "top": -90, "left": 210, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot_soil", "top": 40, "left": 210, "attrs": { "value": "0" } },
+    { "type": "wokwi-potentiometer", "id": "pot_rain", "top": 130, "left": 210, "attrs": { "value": "0" } },
+    { "type": "wokwi-led", "id": "ledG", "top": 220, "left": 210, "attrs": { "color": "green" } },
+    { "type": "wokwi-led", "id": "ledY", "top": 220, "left": 260, "attrs": { "color": "yellow" } },
+    { "type": "wokwi-led", "id": "ledR", "top": 220, "left": 310, "attrs": { "color": "red" } },
+    { "type": "wokwi-resistor", "id": "rG", "top": 290, "left": 200, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "rY", "top": 320, "left": 250, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "rR", "top": 350, "left": 300, "attrs": { "value": "220" } },
+    { "type": "wokwi-buzzer", "id": "bz1", "top": 130, "left": 360, "attrs": { "volume": "0.1" } },
+    { "type": "wokwi-pushbutton", "id": "btn1", "top": 100, "left": -120, "attrs": { "color": "blue" } }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+
+    [ "mpu1:VCC", "esp:3V3", "red", [] ],
+    [ "mpu1:GND", "esp:GND.1", "black", [] ],
+    [ "mpu1:SDA", "esp:D21", "green", [] ],
+    [ "mpu1:SCL", "esp:D22", "purple", [] ],
+
+    [ "pot_soil:VCC", "esp:3V3", "red", [] ],
+    [ "pot_soil:GND", "esp:GND.2", "black", [] ],
+    [ "pot_soil:SIG", "esp:D34", "blue", [] ],
+
+    [ "pot_rain:VCC", "esp:3V3", "red", [] ],
+    [ "pot_rain:GND", "esp:GND.2", "black", [] ],
+    [ "pot_rain:SIG", "esp:D35", "cyan", [] ],
+
+    [ "esp:D26", "rG:1", "green", [] ],
+    [ "rG:2", "ledG:A", "green", [] ],
+    [ "ledG:C", "esp:GND.2", "black", [] ],
+
+    [ "esp:D27", "rY:1", "gold", [] ],
+    [ "rY:2", "ledY:A", "gold", [] ],
+    [ "ledY:C", "esp:GND.2", "black", [] ],
+
+    [ "esp:D14", "rR:1", "red", [] ],
+    [ "rR:2", "ledR:A", "red", [] ],
+    [ "ledR:C", "esp:GND.2", "black", [] ],
+
+    [ "bz1:1", "esp:GND.2", "black", [] ],
+    [ "bz1:2", "esp:D25", "orange", [] ],
+
+    [ "btn1:1.l", "esp:D15", "gray", [] ],
+    [ "btn1:2.l", "esp:GND.1", "black", [] ]
+  ],
+  "dependencies": {}
+}

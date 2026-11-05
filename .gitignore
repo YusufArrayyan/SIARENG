@@ -1,0 +1,8 @@
+.pio/
+.vscode/.browse*
+__pycache__/
+*.pyc
+.env
+test_host/test_logic
+.venv/
+*.exe
