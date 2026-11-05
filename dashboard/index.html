@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>SIARENG · Pemantau Lereng</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3.5c3 3.6 6 7.3 6 10.5a6 6 0 0 1-12 0c0-3.2 3-6.9 6-10.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><path d="M7 15.5a4.5 4.5 0 0 1-.6-8.96A5.5 5.5 0 0 1 17 7.5a4 4 0 0 1 .5 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 18l-1 2.5M13 18l-1 2.5M17 18l-1 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-tilt" viewBox="0 0 24 24"><path d="M4 19h16M4 19L17 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M11 19a7 7 0 0 0-1.6-4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12.5l2.7 2.7L16 9.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.2v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-alarm" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 1 6 6v4l2 3H4l2-3V9a6 6 0 0 1 6-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 19.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">SIARENG</span>
+        <span class="brand-sub">Pemantau Lereng</span>
+      </div>
+      <div class="topbar-actions">
+        <span id="conn" class="conn" data-state="demo" role="status">
+          <span class="conn-dot" aria-hidden="true"></span><span id="conn-text">Mode demo</span>
+        </span>
+        <button id="btn-sound" class="btn-utility" type="button" aria-pressed="false">Bunyi alarm: mati</button>
+        <button id="btn-notify" class="btn-utility" type="button">Aktifkan notifikasi</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="alert-banner" class="alert-banner" role="alert" hidden>
+    <svg class="ic" aria-hidden="true"><use href="#i-alarm"/></svg>
+    <span id="alert-text"></span>
+  </div>
+
+  <main class="page">
+    <section id="hero" class="hero" data-status="aman" aria-labelledby="hero-title">
+      <div class="hero-text">
+        <p class="eyebrow" id="hero-place">Lereng uji · esp32-longsor-lereng01</p>
+        <h1 id="hero-title" class="hero-title" aria-live="polite">
+          <svg class="hero-icon" aria-hidden="true"><use id="hero-icon-use" href="#i-ok"/></svg>
+          <span id="hero-status">Aman</span>
+        </h1>
+        <p id="hero-reason" class="hero-reason">Tanah dan kemiringan masih dalam batas normal.</p>
+        <p class="hero-meta"><span id="hero-since">Sejak baru saja</span> · <span id="hero-updated">Menunggu data</span></p>
+      </div>
+      <ol class="ladder" aria-label="Tingkat status">
+        <li data-level="aman"><span class="ladder-dot"></span>Aman</li>
+        <li data-level="waspada"><span class="ladder-dot"></span>Waspada</li>
+        <li data-level="bahaya"><span class="ladder-dot"></span>Bahaya</li>
+      </ol>
+    </section>
+
+    <section class="metrics" aria-label="Pembacaan sensor">
+      <article class="card metric" id="m-soil">
+        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-drop"/></svg><h2>Kelembapan tanah</h2></header>
+        <p class="metric-value"><span class="num" data-k="soil">–</span><span class="unit">%</span></p>
+        <div class="meter" aria-hidden="true"><span class="meter-fill"></span><span class="meter-mark" style="left:60%"></span><span class="meter-mark strong" style="left:80%"></span></div>
+        <p class="metric-note" data-note="soil">Basah mulai 60%, jenuh mulai 80%</p>
+      </article>
+      <article class="card metric" id="m-rain">
+        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-rain"/></svg><h2>Intensitas hujan</h2></header>
+        <p class="metric-value"><span class="num" data-k="rain">–</span><span class="unit">%</span></p>
+        <div class="meter" aria-hidden="true"><span class="meter-fill"></span><span class="meter-mark" style="left:40%"></span></div>
+        <p class="metric-note" data-note="rain">Hujan deras mulai 40%</p>
+      </article>
+      <article class="card metric" id="m-tilt">
+        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-tilt"/></svg><h2>Pergeseran kemiringan</h2></header>
+        <p class="metric-value"><span class="num" data-k="tilt">–</span><span class="unit">°</span></p>
+        <div class="meter" aria-hidden="true"><span class="meter-fill"></span><span class="meter-mark" style="left:20%"></span><span class="meter-mark strong" style="left:50%"></span></div>
+        <p class="metric-note" data-note="tilt">Waspada mulai 2°, bahaya mulai 5° (skala 0–10°)</p>
+      </article>
+    </section>
+
+    <section class="card chart-card" aria-labelledby="chart-title">
+      <div class="chart-head">
+        <div>
+          <h2 id="chart-title">Riwayat 10 menit terakhir</h2>
+          <p class="sub" id="chart-sub">Garis putus-putus menandai ambang status</p>
+        </div>
+        <div class="segmented" role="tablist" aria-label="Pilih data grafik">
+          <button role="tab" aria-selected="true" data-series="soil">Tanah</button>
+          <button role="tab" aria-selected="false" data-series="rain">Hujan</button>
+          <button role="tab" aria-selected="false" data-series="tilt">Kemiringan</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Grafik riwayat sensor"></canvas></div>
+    </section>
+
+    <div class="grid-2">
+      <section class="card" aria-labelledby="ev-title">
+        <h2 id="ev-title">Kejadian</h2>
+        <ul id="events" class="events"></ul>
+        <p id="events-empty" class="empty">Belum ada kejadian. Perubahan status dan kalibrasi akan muncul di sini.</p>
+      </section>
+
+      <section class="card" aria-labelledby="an-title">
+        <h2 id="an-title">Analitik</h2>
+        <dl class="kv">
+          <div><dt>Perubahan kelembapan 5 menit</dt><dd id="a-trend">–</dd></div>
+          <div><dt>Lonjakan kemiringan (z-score)</dt><dd id="a-z">–</dd></div>
+          <div><dt>Waktu di status bahaya hari ini</dt><dd id="a-danger">0 dtk</dd></div>
+        </dl>
+        <h3 class="mini-title">Perangkat</h3>
+        <dl class="kv">
+          <div><dt>ID</dt><dd id="d-id">–</dd></div>
+          <div><dt>Paket terakhir</dt><dd id="d-seq">–</dd></div>
+          <div><dt>Waktu nyala alat</dt><dd id="d-uptime">–</dd></div>
+          <div><dt>ADC tanah / hujan</dt><dd id="d-raw">–</dd></div>
+        </dl>
+      </section>
+    </div>
+
+    <section id="demo" class="card demo" aria-labelledby="demo-title">
+      <div class="demo-head">
+        <div>
+          <h2 id="demo-title">Kendali demo</h2>
+          <p class="sub">Geser untuk meniru kondisi lereng. Logika status sama dengan firmware: naik setelah bertahan 2 detik, turun setelah 6 detik.</p>
+        </div>
+        <div class="presets">
+          <button class="btn-pill ghost" data-preset="aman" type="button">Kondisi normal</button>
+          <button class="btn-pill ghost" data-preset="hujan" type="button">Hujan deras</button>
+          <button class="btn-pill" data-preset="bahaya" type="button">Lereng bergerak</button>
+        </div>
+      </div>
+      <div class="sliders">
+        <label class="slider"><span>Kelembapan tanah <output id="o-soil">20%</output></span>
+          <input id="s-soil" type="range" min="0" max="100" value="20"></label>
+        <label class="slider"><span>Intensitas hujan <output id="o-rain">0%</output></span>
+          <input id="s-rain" type="range" min="0" max="100" value="0"></label>
+        <label class="slider"><span>Kemiringan <output id="o-tilt">0,0°</output></span>
+          <input id="s-tilt" type="range" min="0" max="10" step="0.1" value="0"></label>
+      </div>
+      <button id="btn-calib" class="btn-utility" type="button">Kalibrasi ulang kemiringan</button>
+    </section>
+
+    <footer class="foot">
+      <p>SIARENG adalah alat pembelajaran Teknologi IoT, Informatika UNIB. Ambang status masih nilai awal untuk uji, belum berdasarkan kajian geologi, dan alat ini bukan sistem peringatan dini resmi. Untuk keadaan darurat, ikuti arahan BPBD setempat.</p>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

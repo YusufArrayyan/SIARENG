@@ -45,6 +45,12 @@ cd firmware/test_host
 g++ -std=c++17 -Wall -Wextra -I../include test_logic.cpp -o test_logic && ./test_logic
 ```
 
+## Dashboard monitoring
+
+Pantau status lereng dari laptop atau HP. Buka `dashboard/index.html` untuk mode demo, atau jalankan
+backend agar dashboard menampilkan data asli dari ESP32 lewat USB. Petunjuk lengkap ada di
+[`backend-api/README.md`](backend-api/README.md).
+
 ## Merakit alat asli
 
 Panduan lengkap dari breadboard sampai terpasang di lereng (catu daya surya, box IP65, kalibrasi):

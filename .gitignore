@@ -7,3 +7,4 @@ test_host/test_logic
 .venv/
 *.exe
 ~$*
+*.db
