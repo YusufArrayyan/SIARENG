@@ -6,3 +6,4 @@ __pycache__/
 test_host/test_logic
 .venv/
 *.exe
+~$*
