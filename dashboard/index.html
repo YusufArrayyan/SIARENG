@@ -15,6 +15,7 @@
     <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12.5l2.7 2.7L16 9.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4.5M12 17.2v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
     <symbol id="i-alarm" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 1 6 6v4l2 3H4l2-3V9a6 6 0 0 1 6-6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 19.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-off" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5v5M12 16v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
   </svg>
 
   <header class="topbar">
@@ -49,53 +50,106 @@
         </h1>
         <p id="hero-reason" class="hero-reason">Tanah dan kemiringan masih dalam batas normal.</p>
         <p class="hero-meta"><span id="hero-since">Sejak baru saja</span> · <span id="hero-updated">Menunggu data</span></p>
+        <ol class="ladder" aria-label="Tingkat status">
+          <li data-level="aman"><span class="ladder-dot"></span>Aman</li>
+          <li data-level="waspada"><span class="ladder-dot"></span>Waspada</li>
+          <li data-level="bahaya"><span class="ladder-dot"></span>Bahaya</li>
+        </ol>
       </div>
-      <ol class="ladder" aria-label="Tingkat status">
-        <li data-level="aman"><span class="ladder-dot"></span>Aman</li>
-        <li data-level="waspada"><span class="ladder-dot"></span>Waspada</li>
-        <li data-level="bahaya"><span class="ladder-dot"></span>Bahaya</li>
+
+      <figure class="scene" aria-hidden="true">
+        <svg viewBox="0 0 300 200">
+          <g id="sc-rain" class="sc-rain">
+            <path d="M40 18l-6 16M78 8l-6 16M116 22l-6 16M154 6l-6 16M192 20l-6 16M230 10l-6 16M268 24l-6 16M60 52l-6 16M134 50l-6 16M212 54l-6 16"/>
+          </g>
+          <path class="sc-ground" d="M0 172 L300 84 L300 200 L0 200 Z"/>
+          <path id="sc-wet" class="sc-wet" d="M0 172 L300 84 L300 200 L0 200 Z"/>
+          <path class="sc-surface" d="M0 172 L300 84"/>
+          <line class="sc-ghost" x1="170" y1="122" x2="170" y2="52"/>
+          <g id="sc-pole">
+            <line class="sc-pole" x1="170" y1="140" x2="170" y2="60"/>
+            <rect class="sc-box" x="155" y="62" width="30" height="24" rx="4"/>
+            <circle id="sc-led" class="sc-led" cx="170" cy="74" r="4.5"/>
+            <path class="sc-panel" d="M150 54 L190 46"/>
+          </g>
+          <path class="sc-probe" d="M185 82 C206 86 214 96 214 112 L214 126"/>
+        </svg>
+        <figcaption id="sc-cap">Ilustrasi. Kemiringan tiang digambar 3× lebih besar agar terlihat.</figcaption>
+      </figure>
+    </section>
+
+    <section id="setup" class="card setup" hidden aria-labelledby="setup-title">
+      <h2 id="setup-title">Belum ada data dari alat</h2>
+      <p class="sub">Server sudah berjalan, tetapi belum menerima kiriman dari ESP32. Pilih salah satu cara menyambungkannya:</p>
+      <ol class="steps">
+        <li><strong>Kabel USB.</strong> Colokkan ESP32 ke laptop ini, tutup Serial Monitor, lalu jalankan server dengan <code>SERIAL_PORT=COM5</code> (sesuaikan nomor port).</li>
+        <li><strong>WiFi.</strong> Di firmware, set <code>KIRIM_WIFI 1</code> dan isi <code>secrets.h</code> dengan nama WiFi serta alamat laptop ini, lalu upload ulang.</li>
+        <li><strong>Belum punya alat?</strong> <a href="?demo">Buka mode demo</a> untuk mencoba dashboard dengan data simulasi.</li>
       </ol>
+      <p class="sub">Langkah lengkapnya ada di <code>docs/panduan-pemula.md</code>.</p>
     </section>
 
     <section class="metrics" aria-label="Pembacaan sensor">
       <article class="card metric" id="m-soil">
-        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-drop"/></svg><h2>Kelembapan tanah</h2></header>
-        <p class="metric-value"><span class="num" data-k="soil">–</span><span class="unit">%</span></p>
+        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-drop"/></svg><h2>Kelembapan tanah</h2><span class="chip" data-chip="soil">–</span></header>
+        <div class="metric-row">
+          <p class="metric-value"><span class="num" data-k="soil">–</span><span class="unit">%</span></p>
+          <svg class="spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><polyline data-spark="soil" points=""/></svg>
+        </div>
         <div class="meter" aria-hidden="true"><span class="meter-fill"></span><span class="meter-mark" style="left:60%"></span><span class="meter-mark strong" style="left:80%"></span></div>
-        <p class="metric-note" data-note="soil">Basah mulai 60%, jenuh mulai 80%</p>
+        <p class="metric-note">Basah mulai 60%, jenuh mulai 80%</p>
       </article>
       <article class="card metric" id="m-rain">
-        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-rain"/></svg><h2>Intensitas hujan</h2></header>
-        <p class="metric-value"><span class="num" data-k="rain">–</span><span class="unit">%</span></p>
-        <div class="meter" aria-hidden="true"><span class="meter-fill"></span><span class="meter-mark" style="left:40%"></span></div>
-        <p class="metric-note" data-note="rain">Hujan deras mulai 40%</p>
+        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-rain"/></svg><h2>Intensitas hujan</h2><span class="chip" data-chip="rain">–</span></header>
+        <div class="metric-row">
+          <p class="metric-value"><span class="num" data-k="rain">–</span><span class="unit">%</span></p>
+          <svg class="spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><polyline data-spark="rain" points=""/></svg>
+        </div>
+        <div class="meter" aria-hidden="true"><span class="meter-fill"></span><span class="meter-mark strong" style="left:40%"></span></div>
+        <p class="metric-note">Hujan deras mulai 40%</p>
       </article>
       <article class="card metric" id="m-tilt">
-        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-tilt"/></svg><h2>Pergeseran kemiringan</h2></header>
-        <p class="metric-value"><span class="num" data-k="tilt">–</span><span class="unit">°</span></p>
+        <header class="metric-head"><svg class="ic" aria-hidden="true"><use href="#i-tilt"/></svg><h2>Pergeseran kemiringan</h2><span class="chip" data-chip="tilt">–</span></header>
+        <div class="metric-row">
+          <p class="metric-value"><span class="num" data-k="tilt">–</span><span class="unit">°</span></p>
+          <svg class="spark" viewBox="0 0 100 32" preserveAspectRatio="none" aria-hidden="true"><polyline data-spark="tilt" points=""/></svg>
+        </div>
         <div class="meter" aria-hidden="true"><span class="meter-fill"></span><span class="meter-mark" style="left:20%"></span><span class="meter-mark strong" style="left:50%"></span></div>
-        <p class="metric-note" data-note="tilt">Waspada mulai 2°, bahaya mulai 5° (skala 0–10°)</p>
+        <p class="metric-note">Waspada mulai 2°, bahaya mulai 5°</p>
       </article>
     </section>
 
     <section class="card chart-card" aria-labelledby="chart-title">
       <div class="chart-head">
         <div>
-          <h2 id="chart-title">Riwayat 10 menit terakhir</h2>
-          <p class="sub" id="chart-sub">Garis putus-putus menandai ambang status</p>
+          <h2 id="chart-title">Riwayat</h2>
+          <p class="sub" id="chart-sub">Garis putus-putus menandai ambang status. Arahkan kursor ke grafik untuk melihat nilai.</p>
         </div>
-        <div class="segmented" role="tablist" aria-label="Pilih data grafik">
-          <button role="tab" aria-selected="true" data-series="soil">Tanah</button>
-          <button role="tab" aria-selected="false" data-series="rain">Hujan</button>
-          <button role="tab" aria-selected="false" data-series="tilt">Kemiringan</button>
+        <div class="chart-controls">
+          <div class="segmented" id="seg-range" role="group" aria-label="Rentang waktu">
+            <button type="button" aria-pressed="true" data-range="10">10 mnt</button>
+            <button type="button" aria-pressed="false" data-range="60">1 jam</button>
+            <button type="button" aria-pressed="false" data-range="1440">24 jam</button>
+          </div>
+          <div class="segmented" id="seg-series" role="group" aria-label="Data grafik">
+            <button type="button" aria-pressed="true" data-series="soil">Tanah</button>
+            <button type="button" aria-pressed="false" data-series="rain">Hujan</button>
+            <button type="button" aria-pressed="false" data-series="tilt">Kemiringan</button>
+          </div>
         </div>
       </div>
-      <div class="chart-wrap"><canvas id="chart" role="img" aria-label="Grafik riwayat sensor"></canvas></div>
+      <div class="chart-wrap">
+        <canvas id="chart" role="img" aria-label="Grafik riwayat sensor"></canvas>
+        <div id="tip" class="tip" hidden></div>
+      </div>
     </section>
 
     <div class="grid-2">
       <section class="card" aria-labelledby="ev-title">
-        <h2 id="ev-title">Kejadian</h2>
+        <div class="card-head">
+          <h2 id="ev-title">Kejadian</h2>
+          <button id="btn-csv" class="btn-utility" type="button">Unduh CSV</button>
+        </div>
         <ul id="events" class="events"></ul>
         <p id="events-empty" class="empty">Belum ada kejadian. Perubahan status dan kalibrasi akan muncul di sini.</p>
       </section>
@@ -112,6 +166,7 @@
           <div><dt>ID</dt><dd id="d-id">–</dd></div>
           <div><dt>Paket terakhir</dt><dd id="d-seq">–</dd></div>
           <div><dt>Waktu nyala alat</dt><dd id="d-uptime">–</dd></div>
+          <div><dt>Sinyal WiFi</dt><dd id="d-rssi">–</dd></div>
           <div><dt>ADC tanah / hujan</dt><dd id="d-raw">–</dd></div>
         </dl>
       </section>

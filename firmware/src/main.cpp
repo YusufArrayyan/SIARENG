@@ -2,7 +2,8 @@
 //  Pemantau Potensi Longsor Lereng - ESP32 (non-blocking)
 //  Sensor : MPU6050 (kemiringan), kelembapan tanah, sensor hujan
 //  Aktuator: LED hijau/kuning/merah + buzzer
-//  Keluaran: telemetri JSON per baris lewat Serial (nanti dikirim via MQTT)
+//  Keluaran: telemetri JSON per baris lewat Serial, dan lewat WiFi (HTTP POST)
+//            ke backend bila KIRIM_WIFI = 1 (lihat include/jaringan.h)
 //
 //  CATATAN: ini alarm lokal untuk pembelajaran. Ambang adalah nilai awal
 //  dan BUKAN ambang longsor sungguhan. Bukan sistem peringatan dini resmi.
@@ -12,6 +13,7 @@
 #include <ArduinoJson.h>
 #include "config.h"
 #include "landslide_logic.h"
+#include "jaringan.h"
 
 using namespace longsor;
 
@@ -124,6 +126,14 @@ static void perbaruiIndikator(Status s, unsigned long now) {
 // ------------------------------ JSON ---------------------------------
 static float bulat1(float x) { return roundf(x * 10.0f) / 10.0f; }
 
+// Satu pintu keluar: cetak ke Serial dan (bila aktif) antrekan untuk dikirim lewat WiFi.
+static void keluarkan(const JsonDocument& doc) {
+  char buf[PANJANG_PESAN];
+  serializeJson(doc, buf, sizeof(buf));
+  Serial.println(buf);
+  jaringan::antrekan(buf);
+}
+
 static void kirimTelemetri(Status s, unsigned long now) {
   JsonDocument doc;
   doc["device_id"]      = DEVICE_ID;
@@ -137,18 +147,20 @@ static void kirimTelemetri(Status s, unsigned long now) {
   doc["soil_raw"]       = soilRaw;   // dipakai untuk mengisi *_RAW_KERING / *_RAW_BASAH
   doc["rain_raw"]       = rainRaw;
   doc["alert"]          = (s == Status::BAHAYA);
-  serializeJson(doc, Serial);
-  Serial.println();
+#if KIRIM_WIFI
+  doc["rssi"]           = jaringan::rssi();   // kuat sinyal WiFi (dBm), 0 = belum tersambung
+#endif
+  keluarkan(doc);
 }
 
 static void kirimEvent(const char* nama, const char* dari, const char* ke, unsigned long now) {
   JsonDocument doc;
   doc["event"]     = nama;
+  doc["device_id"] = DEVICE_ID;
   doc["uptime_ms"] = now;
   if (dari) doc["from"] = dari;
   if (ke)   doc["to"]   = ke;
-  serializeJson(doc, Serial);
-  Serial.println();
+  keluarkan(doc);
 }
 
 static unsigned long intervalTelemetri(Status s) {
@@ -169,10 +181,17 @@ void setup() {
   buzzerSetup();
   analogReadResolution(12);
 
+  jaringan::mulai();
+
   mpuOk = mpuInit();
-  Serial.println(mpuOk
-    ? "{\"event\":\"boot\",\"msg\":\"Pemantau longsor aktif, kalibrasi kemiringan dimulai\"}"
-    : "{\"event\":\"error\",\"msg\":\"MPU6050 tidak terdeteksi di I2C 0x68\"}");
+  kirimEvent("boot", nullptr, nullptr, millis());
+  if (!mpuOk) {
+    JsonDocument doc;
+    doc["event"] = "error";
+    doc["device_id"] = DEVICE_ID;
+    doc["msg"] = "MPU6050 tidak terdeteksi di I2C 0x68";
+    keluarkan(doc);
+  }
   tulisLed(false, true, false);  // kuning selama kalibrasi
 }
 

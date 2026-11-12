@@ -5,11 +5,21 @@
 
 // 1 = simulasi Wokwi (potensiometer menggantikan sensor tanah dan hujan)
 // 0 = sensor asli (kalibrasi nilai RAW di bagian bawah!)
+#ifndef SIMULASI
 #define SIMULASI 1
+#endif
 
 // 1 = buzzer pasif / Wokwi (dibunyikan dengan nada lewat LEDC)
 // 0 = buzzer aktif (cukup HIGH/LOW)
+#ifndef BUZZER_PASIF
 #define BUZZER_PASIF 1
+#endif
+
+// 1 = kirim data ke backend lewat WiFi (isi dulu include/secrets.h)
+// 0 = hanya lewat kabel USB (Serial). Alarm lokal bekerja di kedua mode.
+#ifndef KIRIM_WIFI
+#define KIRIM_WIFI 0
+#endif
 
 #define DEVICE_ID "esp32-longsor-lereng01"
 

@@ -45,10 +45,15 @@ cd firmware/test_host
 g++ -std=c++17 -Wall -Wextra -I../include test_logic.cpp -o test_logic && ./test_logic
 ```
 
+## Mulai dari mana?
+
+Belum pernah merakit alat IoT? Ikuti [`docs/panduan-pemula.md`](docs/panduan-pemula.md): 10 langkah dari memasang
+program di laptop, simulasi, merakit di breadboard, sampai data tampil di dashboard lewat WiFi.
+
 ## Dashboard monitoring
 
 Pantau status lereng dari laptop atau HP. Buka `dashboard/index.html` untuk mode demo, atau jalankan
-backend agar dashboard menampilkan data asli dari ESP32 lewat USB. Petunjuk lengkap ada di
+backend agar dashboard menampilkan data asli dari ESP32 lewat USB atau WiFi (`KIRIM_WIFI 1`). Petunjuk lengkap ada di
 [`backend-api/README.md`](backend-api/README.md).
 
 ## Merakit alat asli

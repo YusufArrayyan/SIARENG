@@ -9,11 +9,12 @@
 
 // Ambang sama dengan struct Ambang di landslide_logic.h
 const AMBANG = { soilWaspada: 60, soilJenuh: 80, rainWaspada: 40, tiltWaspada: 2, tiltBahaya: 5, naikMs: 2000, turunMs: 6000 };
-const RIWAYAT_MS = 10 * 60 * 1000;
-const BASI_MS = 10 * 1000;              // tanpa data selama ini = perangkat dianggap diam
+const SIMPAN_MS = 24 * 60 * 60 * 1000;  // riwayat yang disimpan di browser
+const BASI_MS = 15 * 1000;              // tanpa data selama ini = perangkat dianggap diam
 const LEVEL = { aman: 0, waspada: 1, bahaya: 2 };
 const NAMA = ["aman", "waspada", "bahaya"];
-const LABEL = { aman: "Aman", waspada: "Waspada", bahaya: "Bahaya" };
+const LABEL = { aman: "Aman", waspada: "Waspada", bahaya: "Bahaya", diam: "Tidak ada data" };
+const IKON = { aman: "#i-ok", waspada: "#i-warn", bahaya: "#i-alarm", diam: "#i-off" };
 
 const fmt1 = new Intl.NumberFormat("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const fmt0 = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 });
@@ -21,13 +22,14 @@ const fmtJam = new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-di
 const fmtJamPendek = new Intl.DateTimeFormat("id-ID", { hour: "2-digit", minute: "2-digit" });
 
 const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
 
 // ------------------------------------------------------------------ state
 const state = {
   mode: "demo",                 // demo | live
   conn: "demo",                 // demo | connecting | live | stale | offline
   samples: [],                  // {t, soil, rain, tilt, status}
-  events: [],                   // {t, kind, text, level}
+  events: [],                   // {t, level, text}
   status: "aman",
   statusSince: Date.now(),
   last: null,                   // telemetri terakhir (objek dari perangkat)
@@ -35,6 +37,8 @@ const state = {
   dangerMsToday: 0,
   dangerDay: new Date().toDateString(),
   series: "soil",
+  rangeMin: 10,
+  hoverX: null,
   sound: false,
 };
 
@@ -83,57 +87,99 @@ function levelMetrik(k, v) {
   if (k === "rain") return v >= AMBANG.rainWaspada ? "waspada" : "aman";
   return v >= AMBANG.tiltBahaya ? "bahaya" : v >= AMBANG.tiltWaspada ? "waspada" : "aman";
 }
+function labelMetrik(k, v) {
+  if (k === "soil") return v >= AMBANG.soilJenuh ? "Jenuh" : v >= AMBANG.soilWaspada ? "Basah" : "Kering";
+  if (k === "rain") return v >= AMBANG.rainWaspada ? "Deras" : v >= 5 ? "Ringan" : "Tidak hujan";
+  return v >= AMBANG.tiltBahaya ? "Miring" : v >= AMBANG.tiltWaspada ? "Bergeser" : "Stabil";
+}
+
+// Status yang ditampilkan: "diam" bila data sudah basi, supaya layar tidak menampilkan "Aman" palsu.
+function statusTampil(now = Date.now()) {
+  if (state.mode === "live" && (!state.lastAt || now - state.lastAt > BASI_MS)) return "diam";
+  return state.status;
+}
 
 // ------------------------------------------------------------------ ingest
+const keSampel = (d, t) => ({ t, soil: +d.soil_pct || 0, rain: +d.rain_pct || 0, tilt: +d.tilt_delta_deg || 0, status: d.status || "aman" });
+
+function pangkas(now) {
+  const batas = now - SIMPAN_MS;
+  while (state.samples.length && state.samples[0].t < batas) state.samples.shift();
+}
+
 function ingestTelemetry(d, t = Date.now()) {
-  const p = { t, soil: +d.soil_pct || 0, rain: +d.rain_pct || 0, tilt: +d.tilt_delta_deg || 0, status: d.status || "aman" };
-  // akumulasi waktu bahaya hari ini
+  const p = keSampel(d, t);
   const today = new Date(t).toDateString();
   if (today !== state.dangerDay) { state.dangerDay = today; state.dangerMsToday = 0; }
   if (state.lastAt && state.status === "bahaya") state.dangerMsToday += Math.min(t - state.lastAt, BASI_MS);
 
   state.samples.push(p);
-  const batas = t - RIWAYAT_MS;
-  while (state.samples.length && state.samples[0].t < batas) state.samples.shift();
-
-  if (p.status !== state.status) setStatus(p.status, t, false);
+  pangkas(t);
+  if (p.status !== state.status) setStatus(p.status, t);
   state.last = d;
   state.lastAt = t;
   if (state.mode === "live") setConn("live");
   scheduleRender();
 }
 
-function ingestEvent(d, t = Date.now()) {
-  if (d.event === "status_change") {
-    const ke = d.to || "aman";
-    addEvent(t, ke, `Status ${d.from ? LABEL[d.from]?.toLowerCase() + " → " : ""}${LABEL[ke]?.toLowerCase() || ke}`);
-    setStatus(ke, t, true);
-  } else if (d.event === "kalibrasi_ulang") {
-    addEvent(t, "info", "Kalibrasi ulang kemiringan. Posisi sekarang menjadi patokan baru.");
-  } else if (d.event === "baseline_siap") {
-    addEvent(t, "info", "Patokan kemiringan siap. Pemantauan dimulai.");
-  } else if (d.event === "boot") {
-    addEvent(t, "info", "Perangkat menyala.");
-  } else if (d.event === "error") {
-    addEvent(t, "bahaya", d.msg || "Perangkat melaporkan galat.");
+// Ubah event firmware menjadi baris daftar kejadian
+function teksEvent(d) {
+  switch (d.event) {
+    case "status_change": {
+      const ke = d.to || "aman";
+      return { level: ke, text: `Status ${d.from ? d.from + " → " : ""}${ke}`, ke };
+    }
+    case "kalibrasi_ulang": return { level: "info", text: "Kalibrasi ulang kemiringan. Posisi sekarang menjadi patokan baru." };
+    case "baseline_siap": return { level: "info", text: "Patokan kemiringan siap. Pemantauan dimulai." };
+    case "boot": return { level: "info", text: "Perangkat menyala." };
+    case "error": return { level: "bahaya", text: d.msg || "Perangkat melaporkan galat." };
+    default: return null;
   }
+}
+
+function ingestEvent(d, t = Date.now()) {
+  const e = teksEvent(d);
+  if (!e) return;
+  addEvent(t, e.level, e.text);
+  if (e.ke) setStatus(e.ke, t);
   scheduleRender();
 }
 
 function addEvent(t, level, text) {
   state.events.unshift({ t, level, text });
-  if (state.events.length > 100) state.events.pop();
+  if (state.events.length > 200) state.events.pop();
 }
 
-function setStatus(s, t, fromEvent) {
+// Riwayat dari server: isi grafik dan daftar kejadian tanpa memicu alarm untuk kejadian lama.
+function muatRiwayat(telemetry, events) {
+  const baru = telemetry.map((h) => keSampel(h.data, h.ts));
+  const tAkhir = baru.length ? baru.at(-1).t : 0;
+  state.samples = baru.concat(state.samples.filter((s) => s.t > tAkhir));
+  if (events) {
+    state.events = [];
+    for (const e of events) {                       // server mengirim terbaru dulu
+      const x = teksEvent(e.data);
+      if (x) state.events.push({ t: e.ts, level: x.level, text: x.text });
+    }
+  }
+  const h = telemetry.at(-1);
+  if (h && h.ts >= state.lastAt) {
+    state.last = h.data; state.lastAt = h.ts;
+    const s = h.data.status;
+    if (s in LEVEL && s !== state.status) {
+      state.status = s;
+      const ubah = events?.find((e) => e.data.event === "status_change" && e.data.to === s);
+      state.statusSince = ubah ? ubah.ts : h.ts;
+    }
+  }
+  scheduleRender();
+}
+
+function setStatus(s, t) {
   if (!(s in LEVEL) || s === state.status) return;
-  // Catatan kejadian hanya dibuat dari event status_change, supaya tidak dobel
-  // bila telemetri dengan status baru tiba lebih dulu daripada event-nya.
-  const naik = LEVEL[s] > LEVEL[state.status];
   state.status = s;
   state.statusSince = t;
   if (s === "bahaya") notifyDanger();
-  if (!naik && s !== "bahaya") stopAlarm();
 }
 
 // ------------------------------------------------------------------ alarm
@@ -159,36 +205,60 @@ function notifyDanger() {
 
 // ------------------------------------------------------------------ render
 let renderQueued = false;
-function scheduleRender() { if (!renderQueued) { renderQueued = true; requestAnimationFrame(render); } }
+function scheduleRender() {
+  if (renderQueued) return;
+  renderQueued = true;
+  // requestAnimationFrame berhenti saat tab di latar belakang atau jendela tertutup jendela lain.
+  // Timer cadangan memastikan judul tab, banner, dan alarm tetap diperbarui saat dashboard tidak dilihat.
+  const raf = requestAnimationFrame(jalan);
+  const timer = setTimeout(jalan, 250);
+  function jalan() { cancelAnimationFrame(raf); clearTimeout(timer); if (renderQueued) render(); }
+}
 
 function render() {
   renderQueued = false;
   const now = Date.now();
   const p = state.samples.at(-1);
+  const st = statusTampil(now);
+  const diam = st === "diam";
 
   // hero
-  const hero = $("#hero");
-  hero.dataset.status = state.status;
-  $("#hero-status").textContent = LABEL[state.status];
-  $("#hero-icon-use").setAttribute("href", state.status === "aman" ? "#i-ok" : state.status === "waspada" ? "#i-warn" : "#i-alarm");
-  $("#hero-reason").textContent = p ? alasan(state.status, p) : "Menunggu data pertama dari perangkat.";
-  $("#hero-since").textContent = `Sejak ${fmtJamPendek.format(state.statusSince)} (${durasi(now - state.statusSince)})`;
-  $("#hero-updated").textContent = state.lastAt ? `Data terakhir ${durasi(now - state.lastAt)} lalu` : "Menunggu data";
-  document.querySelectorAll(".ladder li").forEach((li) => li.classList.toggle("on", li.dataset.level === state.status));
+  $("#hero").dataset.status = st;
+  $("#hero-status").textContent = LABEL[st];
+  $("#hero-icon-use").setAttribute("href", IKON[st]);
+  if (diam) {
+    $("#hero-reason").textContent = state.lastAt
+      ? `Alat berhenti mengirim data ${durasi(now - state.lastAt)} lalu. Status lereng tidak diketahui. Periksa daya dan sambungan alat.`
+      : "Menunggu data pertama dari alat.";
+    $("#hero-since").textContent = state.lastAt ? `Status terakhir: ${LABEL[state.status].toLowerCase()}` : "Belum pernah tersambung";
+    $("#hero-updated").textContent = state.lastAt ? `Data terakhir pukul ${fmtJam.format(state.lastAt)}` : "Belum ada data";
+  } else {
+    $("#hero-reason").textContent = p ? alasan(st, p) : "Menunggu data pertama dari alat.";
+    $("#hero-since").textContent = `Sejak ${fmtJamPendek.format(state.statusSince)} (${durasi(now - state.statusSince)})`;
+    $("#hero-updated").textContent = state.lastAt ? `Data terakhir ${durasi(now - state.lastAt)} lalu` : "Menunggu data";
+  }
+  $$(".ladder li").forEach((li) => li.classList.toggle("on", li.dataset.level === st));
   if (state.last?.device_id) $("#hero-place").textContent = `Lereng uji · ${state.last.device_id}`;
+  document.body.classList.toggle("stale", diam);
+  $("#setup").hidden = !(state.mode === "live" && !state.lastAt && state.conn !== "connecting");
 
-  // banner + judul tab
-  const bahaya = state.status === "bahaya";
+  // banner, judul tab, alarm
+  const bahaya = st === "bahaya";
   $("#alert-banner").hidden = !bahaya;
   if (bahaya && p) $("#alert-text").textContent = `Status bahaya. ${alasan("bahaya", p)}`;
-  document.title = bahaya ? "BAHAYA · SIARENG" : state.status === "waspada" ? "Waspada · SIARENG" : "SIARENG · Pemantau Lereng";
+  document.title = bahaya ? "BAHAYA · SIARENG" : st === "waspada" ? "Waspada · SIARENG" : diam ? "Tidak ada data · SIARENG" : "SIARENG · Pemantau Lereng";
   if (bahaya) startAlarm(); else stopAlarm();
 
-  // metrik
+  // metrik + ilustrasi
   if (p) {
     metric("soil", p.soil, p.soil, fmt0.format(p.soil));
     metric("rain", p.rain, p.rain, fmt0.format(p.rain));
     metric("tilt", p.tilt, Math.min(p.tilt * 10, 100), fmt1.format(p.tilt));
+    $("#sc-pole").style.transform = `rotate(${Math.min(p.tilt * 3, 40).toFixed(1)}deg)`;
+    $("#sc-wet").style.opacity = (Math.min(p.soil, 100) / 100 * 0.75).toFixed(2);
+    const rain = $("#sc-rain");
+    rain.style.opacity = diam ? 0 : Math.min(p.rain / 60, 1).toFixed(2);
+    rain.classList.toggle("on", !diam && p.rain >= 5);
   }
 
   renderEvents();
@@ -200,18 +270,36 @@ function metric(k, v, pct, text) {
   const card = $(`#m-${k}`);
   card.dataset.level = levelMetrik(k, v);
   card.querySelector(".num").textContent = text;
+  card.querySelector(".chip").textContent = labelMetrik(k, v);
   card.querySelector(".meter-fill").style.width = `${Math.max(0, Math.min(100, pct))}%`;
+
+  // sparkline: 60 pembacaan terakhir
+  const pts = state.samples.slice(-60), maks = k === "tilt" ? 10 : 100;
+  if (pts.length > 1) {
+    card.querySelector("polyline").setAttribute("points",
+      pts.map((s, i) => `${(i / (pts.length - 1) * 100).toFixed(1)},${(30 - Math.min(s[k], maks) / maks * 28).toFixed(1)}`).join(" "));
+  }
 }
 
+let eventsKey = "";
 function renderEvents() {
+  const key = state.events.length + "|" + (state.events[0]?.t || 0);
+  if (key === eventsKey) return;                    // jangan bangun ulang daftar bila tidak berubah
+  eventsKey = key;
   const ul = $("#events");
   $("#events-empty").hidden = state.events.length > 0;
-  ul.innerHTML = "";
-  for (const e of state.events.slice(0, 40)) {
+  ul.replaceChildren();
+  const hariIni = new Date().toDateString();
+  for (const e of state.events.slice(0, 50)) {
     const li = document.createElement("li");
-    const tag = e.level === "info" ? "Info" : LABEL[e.level] || e.level;
-    li.innerHTML = `<span class="ev-time">${fmtJamPendek.format(e.t)}</span><span class="ev-text"><span class="ev-tag ${e.level}">${tag}</span></span>`;
-    li.querySelector(".ev-text").append(document.createTextNode(e.text));
+    const waktu = document.createElement("span"); waktu.className = "ev-time";
+    const tgl = new Date(e.t);
+    waktu.textContent = tgl.toDateString() === hariIni ? fmtJamPendek.format(tgl) : `${tgl.getDate()}/${tgl.getMonth() + 1} ${fmtJamPendek.format(tgl)}`;
+    const teks = document.createElement("span"); teks.className = "ev-text";
+    const tag = document.createElement("span"); tag.className = `ev-tag ${e.level}`;
+    tag.textContent = e.level === "info" ? "Info" : LABEL[e.level] || e.level;
+    teks.append(tag, document.createTextNode(e.text));
+    li.append(waktu, teks);
     ul.append(li);
   }
 }
@@ -219,9 +307,10 @@ function renderEvents() {
 function renderAnalytics(now) {
   const s = state.samples;
   if (s.length > 1) {
-    const ref = s.find((x) => x.t >= now - 5 * 60 * 1000) || s[0];
+    const ref = s.find((x) => x.t >= s.at(-1).t - 5 * 60 * 1000) || s[0];
     const d = s.at(-1).soil - ref.soil;
-    $("#a-trend").textContent = `${d >= 0 ? "naik" : "turun"} ${fmt1.format(Math.abs(d))} poin dalam ${durasi(s.at(-1).t - ref.t)}`;
+    $("#a-trend").textContent = Math.abs(d) < 0.05 ? "Stabil"
+      : `${d > 0 ? "Naik" : "Turun"} ${fmt1.format(Math.abs(d))} poin dalam ${durasi(s.at(-1).t - ref.t)}`;
 
     const win = s.slice(-120, -3).map((x) => x.tilt);
     if (win.length >= 20) {
@@ -240,6 +329,8 @@ function renderAnalytics(now) {
   $("#d-seq").textContent = d?.seq != null ? `#${fmt0.format(d.seq)}` : "–";
   $("#d-uptime").textContent = d?.uptime_ms != null ? durasi(d.uptime_ms) : "–";
   $("#d-raw").textContent = d?.soil_raw != null ? `${d.soil_raw} / ${d.rain_raw}` : "–";
+  const r = d?.rssi;
+  $("#d-rssi").textContent = r ? `${r} dBm · ${r >= -60 ? "kuat" : r >= -75 ? "cukup" : "lemah"}` : d ? (d.mode === "sim" ? "Simulasi" : "Lewat USB") : "–";
 }
 
 function durasi(ms) {
@@ -248,91 +339,138 @@ function durasi(ms) {
   const m = Math.floor(s / 60);
   if (m < 60) return `${m} mnt`;
   const h = Math.floor(m / 60);
-  return `${h} jam ${m % 60} mnt`;
+  if (h < 24) return `${h} jam ${m % 60} mnt`;
+  return `${Math.floor(h / 24)} hari ${h % 24} jam`;
 }
 
 // ------------------------------------------------------------------ grafik (canvas, tanpa pustaka)
 const SERIES = {
-  soil: { max: 100, unit: "%", marks: [[AMBANG.soilWaspada, "Basah"], [AMBANG.soilJenuh, "Jenuh"]], fmt: (v) => fmt0.format(v) },
-  rain: { max: 100, unit: "%", marks: [[AMBANG.rainWaspada, "Deras"]], fmt: (v) => fmt0.format(v) },
-  tilt: { max: 10, unit: "°", marks: [[AMBANG.tiltWaspada, "Waspada"], [AMBANG.tiltBahaya, "Bahaya"]], fmt: (v) => fmt1.format(v) },
+  soil: { nama: "Kelembapan tanah", max: 100, unit: "%", marks: [[AMBANG.soilWaspada, "Basah", "warn"], [AMBANG.soilJenuh, "Jenuh", "danger"]], fmt: (v) => fmt0.format(v) },
+  rain: { nama: "Intensitas hujan", max: 100, unit: "%", marks: [[AMBANG.rainWaspada, "Deras", "warn"]], fmt: (v) => fmt0.format(v) },
+  tilt: { nama: "Pergeseran kemiringan", max: 10, unit: "°", marks: [[AMBANG.tiltWaspada, "Waspada", "warn"], [AMBANG.tiltBahaya, "Bahaya", "danger"]], fmt: (v) => fmt1.format(v) },
 };
+const PAD = { L: 44, R: 68, T: 34, B: 26 };
 
 function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
 function drawChart() {
   const cv = $("#chart"), box = cv.parentElement;
   const dpr = window.devicePixelRatio || 1, W = box.clientWidth, H = box.clientHeight;
-  if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  if (!W || !H) return;
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
   const c = cv.getContext("2d");
   c.setTransform(dpr, 0, 0, dpr, 0, 0);
   c.clearRect(0, 0, W, H);
 
-  const cfg = SERIES[state.series];
-  const ink2 = cssVar("--ink-2"), hair = cssVar("--hairline"), primary = cssVar("--primary"), danger = cssVar("--danger"), warn = cssVar("--warn");
-  const L = 40, R = 64, T = 10, B = 26, pw = W - L - R, ph = H - T - B;
-  const now = Date.now(), t0 = now - RIWAYAT_MS;
-  const x = (t) => L + ((t - t0) / RIWAYAT_MS) * pw;
-  const y = (v) => T + ph - (Math.min(v, cfg.max) / cfg.max) * ph;
+  const cfg = SERIES[state.series], k = state.series;
+  const col = { ink: cssVar("--ink"), ink2: cssVar("--ink-2"), hair: cssVar("--hairline"), primary: cssVar("--primary"), danger: cssVar("--danger"), warn: cssVar("--warn") };
+  const pw = W - PAD.L - PAD.R, ph = H - PAD.T - PAD.B;
+  const rangeMs = state.rangeMin * 60000, now = Date.now(), t0 = now - rangeMs;
+  const x = (t) => PAD.L + ((t - t0) / rangeMs) * pw;
+  const y = (v) => PAD.T + ph - (Math.min(v, cfg.max) / cfg.max) * ph;
   c.font = "12px " + cssVar("--font-text");
 
   // grid
-  c.strokeStyle = hair; c.lineWidth = 1; c.fillStyle = ink2; c.textAlign = "right"; c.textBaseline = "middle";
+  c.strokeStyle = col.hair; c.lineWidth = 1; c.fillStyle = col.ink2; c.textAlign = "right"; c.textBaseline = "middle";
   for (let i = 0; i <= 4; i++) {
     const v = (cfg.max / 4) * i, yy = Math.round(y(v)) + 0.5;
-    c.globalAlpha = 0.6; c.beginPath(); c.moveTo(L, yy); c.lineTo(L + pw, yy); c.stroke(); c.globalAlpha = 1;
-    c.fillText(cfg.fmt(v) + cfg.unit, L - 8, yy);
+    c.globalAlpha = 0.6; c.beginPath(); c.moveTo(PAD.L, yy); c.lineTo(PAD.L + pw, yy); c.stroke(); c.globalAlpha = 1;
+    c.fillText(cfg.fmt(v) + cfg.unit, PAD.L - 8, yy);
   }
-  c.textAlign = "center"; c.textBaseline = "top";
-  for (let m = 10; m >= 0; m -= 2) {
-    const t = now - m * 60000;
-    c.fillText(m === 0 ? "Sekarang" : fmtJamPendek.format(t), x(t), T + ph + 8);
+  c.textBaseline = "top";
+  const ticks = W < 520 ? 3 : 5;
+  for (let i = 0; i <= ticks; i++) {
+    const t = t0 + (rangeMs / ticks) * i;
+    c.textAlign = i === 0 ? "left" : i === ticks ? "right" : "center";
+    c.fillText(i === ticks ? "Sekarang" : fmtJamPendek.format(t), x(t), PAD.T + ph + 8);
   }
 
   // ambang
   c.setLineDash([5, 5]); c.textAlign = "left"; c.textBaseline = "middle";
-  cfg.marks.forEach(([v, label], i) => {
-    const col = i === cfg.marks.length - 1 && state.series !== "rain" ? danger : warn;
-    c.strokeStyle = col; c.globalAlpha = 0.8;
-    c.beginPath(); c.moveTo(L, y(v)); c.lineTo(L + pw, y(v)); c.stroke();
-    c.globalAlpha = 1; c.fillStyle = col; c.fillText(label, L + pw + 8, y(v));
-  });
+  for (const [v, label, warna] of cfg.marks) {
+    c.strokeStyle = col[warna]; c.globalAlpha = 0.8;
+    c.beginPath(); c.moveTo(PAD.L, y(v)); c.lineTo(PAD.L + pw, y(v)); c.stroke();
+    c.globalAlpha = 1; c.fillStyle = col[warna]; c.fillText(label, PAD.L + pw + 8, y(v));
+  }
   c.setLineDash([]);
 
   const pts = state.samples.filter((p) => p.t >= t0);
+  const tip = $("#tip");
   if (pts.length < 2) {
-    c.fillStyle = ink2; c.textAlign = "center"; c.fillText("Menunggu data", L + pw / 2, T + ph / 2);
+    c.fillStyle = col.ink2; c.textAlign = "center";
+    c.fillText(state.mode === "live" ? "Belum ada data pada rentang ini" : "Mengumpulkan data", PAD.L + pw / 2, PAD.T + ph / 2);
+    tip.hidden = true;
     return;
   }
-  // area + garis
-  c.beginPath(); c.moveTo(x(pts[0].t), y(pts[0][state.series]));
-  for (const p of pts) c.lineTo(x(p.t), y(p[state.series]));
-  c.strokeStyle = primary; c.lineWidth = 2; c.lineJoin = "round"; c.stroke();
-  c.lineTo(x(pts.at(-1).t), y(0)); c.lineTo(x(pts[0].t), y(0)); c.closePath();
-  c.globalAlpha = 0.08; c.fillStyle = primary; c.fill(); c.globalAlpha = 1;
 
-  // titik saat status bahaya (bentuk + warna, tidak hanya warna)
-  c.fillStyle = danger;
-  for (const p of pts) if (p.status === "bahaya") { c.beginPath(); c.arc(x(p.t), y(p[state.series]), 2.5, 0, Math.PI * 2); c.fill(); }
+  // garis; jeda lebih dari 30 detik (alat mati) digambar terputus
+  const jeda = Math.max(30000, rangeMs / 120);
+  c.beginPath();
+  pts.forEach((p, i) => {
+    if (i === 0 || p.t - pts[i - 1].t > jeda) c.moveTo(x(p.t), y(p[k])); else c.lineTo(x(p.t), y(p[k]));
+  });
+  c.strokeStyle = col.primary; c.lineWidth = 2; c.lineJoin = "round"; c.stroke();
+
+  // area lembut di bawah garis
+  c.beginPath(); c.moveTo(x(pts[0].t), y(0));
+  for (const p of pts) c.lineTo(x(p.t), y(p[k]));
+  c.lineTo(x(pts.at(-1).t), y(0)); c.closePath();
+  c.globalAlpha = 0.07; c.fillStyle = col.primary; c.fill(); c.globalAlpha = 1;
+
+  // pita di dasar grafik: kapan status waspada / bahaya (bentuk + posisi, bukan hanya warna garis)
+  for (let i = 1; i < pts.length; i++) {
+    const s = pts[i].status;
+    if (s === "aman" || pts[i].t - pts[i - 1].t > jeda) continue;
+    c.fillStyle = s === "bahaya" ? col.danger : col.warn;
+    c.fillRect(x(pts[i - 1].t), PAD.T + ph - 4, Math.max(1, x(pts[i].t) - x(pts[i - 1].t)), 4);
+  }
 
   // nilai terkini
   const last = pts.at(-1);
-  c.fillStyle = primary; c.beginPath(); c.arc(x(last.t), y(last[state.series]), 4.5, 0, Math.PI * 2); c.fill();
-  cv.setAttribute("aria-label", `Grafik ${state.series === "soil" ? "kelembapan tanah" : state.series === "rain" ? "intensitas hujan" : "pergeseran kemiringan"} 10 menit terakhir, nilai sekarang ${cfg.fmt(last[state.series])}${cfg.unit}`);
+  c.fillStyle = col.primary; c.beginPath(); c.arc(x(last.t), y(last[k]), 4.5, 0, Math.PI * 2); c.fill();
+  cv.setAttribute("aria-label", `Grafik ${cfg.nama.toLowerCase()}, nilai sekarang ${cfg.fmt(last[k])}${cfg.unit}`);
+
+  // kursor
+  if (state.hoverX == null || state.hoverX < PAD.L || state.hoverX > PAD.L + pw) { tip.hidden = true; return; }
+  const th = t0 + ((state.hoverX - PAD.L) / pw) * rangeMs;
+  let lo = 0, hi = pts.length - 1;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (pts[mid].t < th) lo = mid + 1; else hi = mid; }
+  const near = lo > 0 && th - pts[lo - 1].t < pts[lo].t - th ? pts[lo - 1] : pts[lo];
+  const hx = x(near.t), hy = y(near[k]);
+  c.strokeStyle = col.ink2; c.lineWidth = 1; c.globalAlpha = 0.6;
+  c.beginPath(); c.moveTo(Math.round(hx) + 0.5, PAD.T); c.lineTo(Math.round(hx) + 0.5, PAD.T + ph); c.stroke(); c.globalAlpha = 1;
+  c.fillStyle = cssVar("--card"); c.strokeStyle = col.primary; c.lineWidth = 2;
+  c.beginPath(); c.arc(hx, hy, 5, 0, Math.PI * 2); c.fill(); c.stroke();
+  tip.hidden = false;
+  tip.replaceChildren();
+  const b = document.createElement("b"); b.textContent = `${cfg.fmt(near[k])}${cfg.unit}`;
+  tip.append(b, ` · ${fmtJam.format(near.t)} · ${LABEL[near.status] || near.status}`);
+  tip.style.left = `${Math.max(90, Math.min(W - 90, hx))}px`;
 }
+
+const chartBox = $("#chart").parentElement;
+chartBox.addEventListener("pointermove", (e) => { state.hoverX = e.clientX - chartBox.getBoundingClientRect().left; drawChart(); });
+chartBox.addEventListener("pointerleave", () => { state.hoverX = null; drawChart(); });
 
 // ------------------------------------------------------------------ koneksi
 function setConn(c) {
+  if (state.conn === c) return;
   state.conn = c;
-  const el = $("#conn");
-  el.dataset.state = c;
+  $("#conn").dataset.state = c;
   $("#conn-text").textContent = {
     demo: "Mode demo: data simulasi",
-    connecting: "Menyambung ke perangkat…",
-    live: "Terhubung ke perangkat",
-    stale: "Perangkat tidak mengirim data",
+    connecting: "Menyambung ke server…",
+    live: "Menerima data dari alat",
+    stale: "Alat tidak mengirim data",
     offline: "Server terputus, mencoba lagi…",
   }[c];
+}
+
+function ambilRiwayat() {
+  return fetch(`/api/history?menit=${state.rangeMin}`, { cache: "no-store" })
+    .then((r) => r.json())
+    .then((j) => muatRiwayat(j.telemetry, j.events))
+    .catch(() => {});
 }
 
 // Mode live: WebSocket ke backend-api
@@ -344,13 +482,13 @@ function startLive() {
   let retry = 1000;
   const connect = () => {
     const ws = new WebSocket(url);
-    ws.onopen = () => { retry = 1000; setConn(state.lastAt && Date.now() - state.lastAt < BASI_MS ? "live" : "stale"); };
+    ws.onopen = () => { retry = 1000; };
     ws.onmessage = (m) => {
       const msg = JSON.parse(m.data);
       if (msg.type === "hello") {
-        for (const h of msg.history || []) ingestTelemetry(h.data, h.ts);
-        for (const e of (msg.events || []).slice().reverse()) ingestEvent(e.data, e.ts);
-        if (!state.lastAt) setConn("stale");
+        muatRiwayat(msg.history || [], msg.events || []);
+        setConn(state.lastAt && Date.now() - state.lastAt < BASI_MS ? "live" : "stale");
+        if (state.rangeMin !== 10) ambilRiwayat();
       } else if (msg.type === "telemetry") ingestTelemetry(msg.data, msg.ts);
       else if (msg.type === "event") ingestEvent(msg.data, msg.ts);
     };
@@ -379,28 +517,26 @@ function startDemo() {
   const setTilt = bind("tilt", (v) => fmt1.format(v) + "°");
 
   const preset = { aman: [20, 0, 0], hujan: [68, 75, 0.4], bahaya: [92, 85, 6.5] };
-  document.querySelectorAll("[data-preset]").forEach((b) => b.addEventListener("click", () => {
+  $$("[data-preset]").forEach((b) => b.addEventListener("click", () => {
     const [a, b2, c] = preset[b.dataset.preset]; setSoil(a); setRain(b2); setTilt(c);
   }));
   $("#btn-calib").addEventListener("click", () => {
     baseline = input.tilt; penilai = new PenilaiStatus();
     ingestEvent({ event: "kalibrasi_ulang" });
-    setStatus("aman", Date.now(), false);
+    setStatus("aman", Date.now());
   });
 
   ingestEvent({ event: "boot" }, mulai);
-  ingestEvent({ event: "baseline_siap" }, mulai + 2000);
+  ingestEvent({ event: "baseline_siap" }, mulai);
 
   setInterval(() => {
     const now = Date.now();
     for (const k of ["soil", "rain", "tilt"]) f[k] = 0.3 * input[k] + 0.7 * f[k];
     const p = { soil: f.soil, rain: f.rain, tilt: Math.max(0, f.tilt - baseline) };
     const sebelum = penilai.s;
-    if (penilai.perbarui(kandidat(p), now)) {
-      ingestEvent({ event: "status_change", from: NAMA[sebelum], to: NAMA[penilai.s] }, now);
-    }
-    const interval = [2000, 1000, 500][penilai.s];
-    if (now - tKirim >= interval) {
+    const berubah = penilai.perbarui(kandidat(p), now);
+    if (berubah) ingestEvent({ event: "status_change", from: NAMA[sebelum], to: NAMA[penilai.s] }, now);
+    if (berubah || now - tKirim >= [2000, 1000, 500][penilai.s]) {
       tKirim = now;
       ingestTelemetry({
         device_id: "esp32-longsor-lereng01", seq: ++seq, uptime_ms: now - mulai, mode: "sim",
@@ -413,18 +549,35 @@ function startDemo() {
 }
 
 // ------------------------------------------------------------------ kontrol UI
-document.querySelectorAll(".segmented button").forEach((b) => b.addEventListener("click", () => {
-  state.series = b.dataset.series;
-  document.querySelectorAll(".segmented button").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
-  drawChart();
-}));
+function segmented(sel, attr, onPick) {
+  $$(`${sel} button`).forEach((b) => b.addEventListener("click", () => {
+    $$(`${sel} button`).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    onPick(b.dataset[attr]);
+  }));
+}
+segmented("#seg-series", "series", (v) => { state.series = v; drawChart(); });
+segmented("#seg-range", "range", (v) => {
+  state.rangeMin = +v;
+  if (state.mode === "live") ambilRiwayat(); else drawChart();
+});
+
+$("#btn-csv").addEventListener("click", () => {
+  if (state.mode === "live") { location.href = `/api/export.csv?menit=${state.rangeMin}`; return; }
+  const baris = ["waktu,status,soil_pct,rain_pct,tilt_delta_deg",
+    ...state.samples.map((s) => `${new Date(s.t).toISOString()},${s.status},${s.soil},${s.rain},${s.tilt}`)];
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([baris.join("\n")], { type: "text/csv" }));
+  a.download = "siareng-demo.csv";
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
 
 $("#btn-sound").addEventListener("click", (e) => {
   state.sound = !state.sound;
   if (state.sound && !audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   e.currentTarget.setAttribute("aria-pressed", String(state.sound));
   e.currentTarget.textContent = `Bunyi alarm: ${state.sound ? "nyala" : "mati"}`;
-  if (state.sound && state.status === "bahaya") startAlarm(); else if (!state.sound) stopAlarm();
+  if (state.sound) { beep(); if (statusTampil() === "bahaya") startAlarm(); } else stopAlarm();
 });
 
 const btnNotify = $("#btn-notify");

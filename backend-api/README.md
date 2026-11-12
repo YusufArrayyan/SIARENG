@@ -3,9 +3,9 @@
 Alurnya: ESP32 mencetak JSON ke USB → backend membaca, menyimpan ke SQLite, dan menyiarkan lewat WebSocket → dashboard di browser menampilkan status secara langsung.
 
 ```
-ESP32 --USB serial--> backend-api (FastAPI) --WebSocket--> dashboard (browser, laptop/HP)
-                           |  POST /api/telemetry  (nanti: ESP32 via WiFi / jembatan MQTT)
-                           '--> siareng.db (SQLite, retensi 30 hari)
+ESP32 --USB serial------------> backend-api (FastAPI) --WebSocket--> dashboard (browser, laptop/HP)
+ESP32 --WiFi, POST /api/telemetry-->   |                 '--> Telegram (opsional)
+                                       '--> siareng.db (SQLite, retensi 30 hari)
 ```
 
 ## Menjalankan
@@ -28,6 +28,19 @@ SERIAL_PORT=COM5 .venv/Scripts/python -m uvicorn app:app --host 0.0.0.0 --port 8
 
 Buka `http://localhost:8000`. Laptop dan HP di WiFi yang sama bisa membuka `http://<IP-laptop>:8000`.
 
+**Dengan alat lewat WiFi:** set `KIRIM_WIFI 1` di firmware dan isi `firmware/include/secrets.h`. Jalankan perintah yang sama, `SERIAL_PORT` boleh dikosongkan. Langkah lengkap ada di [`docs/panduan-pemula.md`](../docs/panduan-pemula.md).
+
+## Pengaturan (environment variable, semua opsional)
+
+| Nama | Fungsi |
+|---|---|
+| `SERIAL_PORT`, `SERIAL_BAUD` | Port USB ESP32, misalnya `COM5`. Baud bawaan 115200 |
+| `API_KEY` | Bila diisi, `POST /api/telemetry` wajib membawa header `X-API-Key` yang sama |
+| `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Kirim pesan Telegram saat status berubah dan saat alat diam lebih dari 60 detik |
+| `DB_PATH`, `RETENSI_HARI` | Lokasi SQLite dan lama data disimpan (bawaan 30 hari) |
+
+Jangan menulis token atau kunci ke dalam file yang ikut ter-commit.
+
 ## Endpoint
 
 | Metode | Path | Fungsi |
@@ -35,7 +48,9 @@ Buka `http://localhost:8000`. Laptop dan HP di WiFi yang sama bisa membuka `http
 | GET | `/` | Dashboard |
 | GET | `/api/health` | Cek server hidup dan port serial yang dipakai |
 | POST | `/api/telemetry` | Kirim satu pesan firmware (telemetri atau event) dalam format JSON |
-| GET | `/api/history?menit=10` | Riwayat telemetri dan 50 event terakhir |
+| GET | `/api/status` | Pembacaan terakhir dan apakah alat masih mengirim data |
+| GET | `/api/history?menit=10` | Riwayat telemetri (maksimal 720 titik, otomatis dijarangkan) dan kejadian |
+| GET | `/api/export.csv?menit=1440` | Unduh riwayat sebagai CSV |
 | WS | `/ws` | Siaran real-time ke dashboard |
 | GET | `/docs` | Dokumentasi OpenAPI otomatis (Swagger) |
 
@@ -48,7 +63,6 @@ curl -X POST localhost:8000/api/telemetry -H "Content-Type: application/json" \
 
 ## Yang belum ada (tahap berikutnya sesuai RPS)
 
-- MQTT (Mosquitto) sebagai jalur utama ESP32 → server, Minggu 6.
+- MQTT (Mosquitto) sebagai jalur utama ESP32 ke server, Minggu 6. Saat ini memakai HTTP POST.
 - Basis data time-series (InfluxDB/TimescaleDB) menggantikan SQLite, Minggu 10.
-- Docker Compose, TLS, ACL broker, dan JWT untuk API, Minggu 11–13.
-- Alert Telegram, Minggu 14. Saat ini peringatan berupa banner, bunyi, dan notifikasi browser.
+- Docker Compose, TLS, ACL broker, dan JWT, Minggu 11–13. Saat ini pengaman hanya kunci API lewat HTTP biasa, jadi pakai di jaringan lokal saja.
