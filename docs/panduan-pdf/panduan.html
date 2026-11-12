@@ -1,0 +1,916 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8">
+<title>Panduan membuat SIARENG</title><style>
+@page { size: A4; margin: 16mm 16mm 18mm; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; color: #1d1d1f; font-size: 10.5pt; line-height: 1.5; }
+h1, h2, h3, h4 { margin: 0; font-weight: 600; letter-spacing: -0.02em; }
+p { margin: 0 0 8px; }
+code { font-family: Consolas, "SF Mono", monospace; font-size: 9pt; background: #f0f0f2; padding: 1px 5px; border-radius: 4px; }
+pre { font-family: Consolas, monospace; font-size: 9pt; background: #1d1d1f; color: #f5f5f7; padding: 10px 14px; border-radius: 10px; margin: 6px 0 10px; white-space: pre-wrap; }
+table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 9.5pt; }
+th { text-align: left; font-weight: 600; color: #6e6e73; border-bottom: 1.5px solid #d2d2d7; padding: 6px 8px; }
+td { border-bottom: 1px solid #e8e8ed; padding: 6px 8px; vertical-align: top; }
+ol, ul { margin: 4px 0 10px; padding-left: 20px; } li { margin: 3px 0; }
+.small { font-size: 9pt; color: #6e6e73; }
+.cover { height: 260mm; display: flex; flex-direction: column; justify-content: center; page-break-after: always; }
+.eyebrow { color: #6e6e73; font-size: 11pt; }
+.cover h1 { font-size: 46pt; line-height: 1.02; letter-spacing: -0.035em; margin: 8px 0 16px; }
+.lead { font-size: 15pt; color: #3a3a3c; line-height: 1.35; }
+.cover-art { display: flex; gap: 10px; margin: 36px 0; }
+.cover-art figure { flex: 1; margin: 0; background: #f5f5f7; border-radius: 16px; padding: 12px 10px 10px; }
+.cover-art figcaption { text-align: center; font-weight: 600; margin-top: 6px; }
+.cover-foot { margin-top: auto; color: #6e6e73; font-size: 9pt; }
+.scene { width: 100%; display: block; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+.dot.g { background: #2a9d4b; } .dot.y { background: #e6a100; } .dot.r { background: #e0302a; }
+.page { page-break-before: always; }
+.big { font-size: 24pt; margin-bottom: 14px; }
+h3 { font-size: 12.5pt; margin: 14px 0 6px; }
+.note { background: #e6f1fb; border-radius: 12px; padding: 10px 14px; margin: 12px 0; }
+.warn { background: #fff4e5; border-radius: 12px; padding: 10px 14px; margin: 12px 0; }
+.ok { background: #e9f6ec; border-radius: 12px; padding: 9px 14px; margin: 10px 0 4px; break-inside: avoid; }
+.ok b { color: #1e7a3a; margin-right: 4px; }
+.flow { padding-left: 20px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+.card { background: #f5f5f7; border-radius: 12px; padding: 10px 12px; }
+.card h4 { font-size: 10pt; margin-bottom: 4px; } .card p { font-size: 8.8pt; margin: 0 0 4px; }
+.card .ana { color: #0066cc; font-weight: 600; }
+.step { page-break-before: always; }
+.step-head { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+.num { width: 46px; height: 46px; border-radius: 50%; background: #1d1d1f; color: #fff; font-size: 20pt; font-weight: 600; display: flex; align-items: center; justify-content: center; flex: none; }
+.step h2 { font-size: 20pt; } .meta { color: #6e6e73; margin: 0; font-size: 9.5pt; }
+.substep { break-inside: avoid; margin: 0 0 18px; padding-top: 6px; border-top: 1px solid #e8e8ed; }
+.substep h3 { font-size: 13.5pt; margin: 6px 0 8px; display: flex; align-items: center; gap: 10px; }
+.snum { background: #0066cc; color: #fff; border-radius: 8px; padding: 1px 8px; font-size: 10pt; }
+.dg { width: 100%; display: block; margin: 6px 0; }
+.dg text { font-family: "Segoe UI", system-ui, sans-serif; }
+.lbl { font-size: 13px; font-weight: 600; fill: #1d1d1f; }
+.sub { font-size: 11px; fill: #6e6e73; }
+.chip-t { font-size: 13px; font-weight: 600; fill: #22262b; }
+.dg .chip-t[transform] { fill: #f5f5f7; }
+.pin-e { font-size: 11.5px; font-weight: 600; fill: #f5f5f7; }
+.pin-k { font-size: 11.5px; fill: #1d1d1f; }
+.cap { font-size: 8.8pt; color: #6e6e73; margin-top: 2px; }
+.trouble td:first-child { width: 30%; }
+.end { margin-top: 24px; background: #f5f5f7; border-radius: 12px; padding: 12px 14px; }
+</style></head><body>
+<section class="cover">
+  <p class="eyebrow">Teknologi IoT · Informatika UNIB</p>
+  <h1>Panduan membuat<br>SIARENG</h1>
+  <p class="lead">Alat pemantau potensi longsor lereng berbasis ESP32.<br>Dari nol sampai data tampil di dashboard.</p>
+  <div class="cover-art">
+    <figure><svg viewBox="0 0 300 200" class="scene">
+<g stroke="#378add" stroke-width="2" stroke-linecap="round" opacity="0">
+<path d="M40 18l-6 16M78 8l-6 16M116 22l-6 16M154 6l-6 16M192 20l-6 16M230 10l-6 16M268 24l-6 16M60 52l-6 16M134 50l-6 16M212 54l-6 16"/></g>
+<path d="M0 172 L300 84 L300 200 L0 200 Z" fill="#dccfb4"/>
+<path d="M0 172 L300 84" stroke="#1d1d1f" stroke-width="2" opacity=".55"/>
+<line x1="170" y1="122" x2="170" y2="52" stroke="#1d1d1f" stroke-width="1.5" stroke-dasharray="4 5" opacity=".35"/>
+<g transform="rotate(0 170 122)">
+<line x1="170" y1="140" x2="170" y2="60" stroke="#1d1d1f" stroke-width="4" stroke-linecap="round"/>
+<rect x="155" y="62" width="30" height="24" rx="4" fill="#fff" stroke="#1d1d1f" stroke-width="2"/>
+<circle cx="170" cy="74" r="4.5" fill="#2a9d4b"/>
+<path d="M150 54 L190 46" stroke="#1d1d1f" stroke-width="4" stroke-linecap="round"/></g>
+<path d="M185 82 C206 86 214 96 214 112 L214 126" fill="none" stroke="#1d1d1f" stroke-width="1.5" opacity=".7"/></svg><figcaption><span class="dot g"></span>Aman</figcaption></figure>
+    <figure><svg viewBox="0 0 300 200" class="scene">
+<g stroke="#378add" stroke-width="2" stroke-linecap="round" opacity="0.8">
+<path d="M40 18l-6 16M78 8l-6 16M116 22l-6 16M154 6l-6 16M192 20l-6 16M230 10l-6 16M268 24l-6 16M60 52l-6 16M134 50l-6 16M212 54l-6 16"/></g>
+<path d="M0 172 L300 84 L300 200 L0 200 Z" fill="#9a7a4e"/>
+<path d="M0 172 L300 84" stroke="#1d1d1f" stroke-width="2" opacity=".55"/>
+<line x1="170" y1="122" x2="170" y2="52" stroke="#1d1d1f" stroke-width="1.5" stroke-dasharray="4 5" opacity=".35"/>
+<g transform="rotate(8 170 122)">
+<line x1="170" y1="140" x2="170" y2="60" stroke="#1d1d1f" stroke-width="4" stroke-linecap="round"/>
+<rect x="155" y="62" width="30" height="24" rx="4" fill="#fff" stroke="#1d1d1f" stroke-width="2"/>
+<circle cx="170" cy="74" r="4.5" fill="#e6a100"/>
+<path d="M150 54 L190 46" stroke="#1d1d1f" stroke-width="4" stroke-linecap="round"/></g>
+<path d="M185 82 C206 86 214 96 214 112 L214 126" fill="none" stroke="#1d1d1f" stroke-width="1.5" opacity=".7"/></svg><figcaption><span class="dot y"></span>Waspada</figcaption></figure>
+    <figure><svg viewBox="0 0 300 200" class="scene">
+<g stroke="#378add" stroke-width="2" stroke-linecap="round" opacity="0.8">
+<path d="M40 18l-6 16M78 8l-6 16M116 22l-6 16M154 6l-6 16M192 20l-6 16M230 10l-6 16M268 24l-6 16M60 52l-6 16M134 50l-6 16M212 54l-6 16"/></g>
+<path d="M0 172 L300 84 L300 200 L0 200 Z" fill="#9a7a4e"/>
+<path d="M0 172 L300 84" stroke="#1d1d1f" stroke-width="2" opacity=".55"/>
+<line x1="170" y1="122" x2="170" y2="52" stroke="#1d1d1f" stroke-width="1.5" stroke-dasharray="4 5" opacity=".35"/>
+<g transform="rotate(18 170 122)">
+<line x1="170" y1="140" x2="170" y2="60" stroke="#1d1d1f" stroke-width="4" stroke-linecap="round"/>
+<rect x="155" y="62" width="30" height="24" rx="4" fill="#fff" stroke="#1d1d1f" stroke-width="2"/>
+<circle cx="170" cy="74" r="4.5" fill="#e0302a"/>
+<path d="M150 54 L190 46" stroke="#1d1d1f" stroke-width="4" stroke-linecap="round"/></g>
+<path d="M185 82 C206 86 214 96 214 112 L214 126" fill="none" stroke="#1d1d1f" stroke-width="1.5" opacity=".7"/></svg><figcaption><span class="dot r"></span>Bahaya</figcaption></figure>
+  </div>
+  <p class="cover-foot">Versi 12-11-2026 · github.com/YusufArrayyan/SIARENG</p>
+</section>
+
+<section class="page">
+  <h2 class="big">Isi panduan</h2>
+  <table class="toc">
+    <tr><th>Langkah</th><th>Yang dikerjakan</th><th>Butuh alat?</th><th>Waktu</th></tr>
+    <tr><td>1</td><td>Siapkan laptop</td><td>Tidak</td><td>1 jam</td></tr>
+    <tr><td>2</td><td>Ambil kode SIARENG</td><td>Tidak</td><td>5 menit</td></tr>
+    <tr><td>3</td><td>Coba simulasi dan dashboard demo</td><td>Tidak</td><td>30 menit</td></tr>
+    <tr><td>4</td><td>Beli komponen</td><td></td><td>menunggu kiriman</td></tr>
+    <tr><td>5</td><td>Rakit di breadboard, satu komponen per tahap</td><td>Ya</td><td>2–3 jam</td></tr>
+    <tr><td>6</td><td>Kalibrasi sensor</td><td>Ya</td><td>30 menit</td></tr>
+    <tr><td>7</td><td>Sambungkan ke dashboard lewat kabel USB</td><td>Ya</td><td>15 menit</td></tr>
+    <tr><td>8</td><td>Kirim data lewat WiFi</td><td>Ya</td><td>30 menit</td></tr>
+    <tr><td>9</td><td>Peringatan ke Telegram (opsional)</td><td>Ya</td><td>20 menit</td></tr>
+    <tr><td>10</td><td>Pasang di lapangan</td><td>Ya</td><td>lihat panduan perakitan</td></tr>
+  </table>
+  <div class="note"><b>Cara memakai panduan ini.</b> Kerjakan berurutan. Setiap langkah ditutup kotak hijau
+  <b>"Berhasil kalau"</b>. Jangan lanjut sebelum tanda itu terlihat, supaya kalau ada masalah kamu tahu persis di langkah mana penyebabnya.
+  Langkah 1 sampai 3 tidak butuh alat, jadi bisa dikerjakan sambil menunggu kiriman komponen.</div>
+  <div class="warn">SIARENG adalah alat pembelajaran. Ambang statusnya masih nilai awal untuk uji, bukan hasil kajian geologi,
+  dan alat ini bukan sistem peringatan dini resmi. Untuk keadaan darurat, ikuti arahan BPBD setempat.</div>
+</section>
+
+<section class="page">
+  <h2 class="big">Cara kerja SIARENG</h2>
+  <svg viewBox="0 0 640 250" class="dg" role="img" aria-label="Alur data SIARENG">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9z" fill="#0066cc"/></marker></defs>
+<rect x="10" y="20" width="140" height="64" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/><text x="80.0" y="48" class="lbl" text-anchor="middle">3 sensor</text><text x="80.0" y="68" class="sub" text-anchor="middle">tanah, hujan, miring</text>
+<rect x="10" y="160" width="140" height="64" rx="12" fill="#fff4e5" stroke="#d2d2d7"/><text x="80.0" y="188" class="lbl" text-anchor="middle">LED + buzzer</text><text x="80.0" y="208" class="sub" text-anchor="middle">alarm di lokasi</text>
+<rect x="220" y="90" width="130" height="64" rx="12" fill="#e6f1fb" stroke="#d2d2d7"/><text x="285.0" y="118" class="lbl" text-anchor="middle">ESP32</text><text x="285.0" y="138" class="sub" text-anchor="middle">putuskan status</text>
+<rect x="420" y="90" width="200" height="64" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/><text x="520.0" y="118" class="lbl" text-anchor="middle">Backend (laptop)</text><text x="520.0" y="138" class="sub" text-anchor="middle">terima dan simpan</text>
+<rect x="420" y="186" width="95" height="64" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/><text x="467.5" y="214" class="lbl" text-anchor="middle">Dashboard</text><text x="467.5" y="234" class="sub" text-anchor="middle">laptop / HP</text>
+<rect x="525" y="186" width="95" height="64" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/><text x="572.5" y="214" class="lbl" text-anchor="middle">Telegram</text><text x="572.5" y="234" class="sub" text-anchor="middle">opsional</text>
+<line x1="150" y1="52" x2="218" y2="108" stroke="#0066cc" stroke-width="2.5" marker-end="url(#ah)"/>
+<line x1="218" y1="140" x2="152" y2="186" stroke="#0066cc" stroke-width="2.5" marker-end="url(#ah)"/>
+<line x1="350" y1="122" x2="418" y2="122" stroke="#0066cc" stroke-width="2.5" marker-end="url(#ah)"/><text x="384.0" y="114" class="sub" text-anchor="middle">USB / WiFi</text>
+<line x1="470" y1="154" x2="468" y2="184" stroke="#0066cc" stroke-width="2.5" marker-end="url(#ah)"/>
+<line x1="570" y1="154" x2="572" y2="184" stroke="#0066cc" stroke-width="2.5" marker-end="url(#ah)"/>
+</svg>
+  <ol class="flow">
+    <li><b>Tiga sensor</b> mengukur kelembapan tanah, hujan, dan pergeseran kemiringan.</li>
+    <li><b>ESP32</b> membaca sensor 5 kali per detik, lalu memutuskan status: aman, waspada, atau bahaya.</li>
+    <li><b>LED dan buzzer</b> memberi peringatan langsung di lokasi. Bagian ini tetap bekerja walaupun internet mati.</li>
+    <li>ESP32 juga mengirim datanya ke <b>backend</b> di laptop, yang menyimpan data dan meneruskannya ke <b>dashboard</b> serta Telegram.</li>
+  </ol>
+  <h3>Aturan status</h3>
+  <table>
+    <tr><th>Status</th><th>Syarat</th><th>Yang terjadi di alat</th></tr>
+    <tr><td><span class="dot g"></span>Aman</td><td>Selain kondisi di bawah</td><td>LED hijau</td></tr>
+    <tr><td><span class="dot y"></span>Waspada</td><td>Tanah jenuh (≥ 80%), atau lereng bergeser ≥ 2°, atau tanah basah (≥ 60%) saat hujan deras (≥ 40%)</td><td>LED kuning, bip tiap 3 detik</td></tr>
+    <tr><td><span class="dot r"></span>Bahaya</td><td>Tanah jenuh (≥ 80%) <b>dan</b> lereng bergeser ≥ 5°</td><td>LED merah berkedip, buzzer terus berbunyi</td></tr>
+  </table>
+  <p class="small">Status naik hanya kalau kondisinya bertahan 2 detik, dan turun kalau sudah bertahan 6 detik. Jeda ini mencegah alarm palsu saat sensor tersenggol sebentar.</p>
+</section>
+
+<section class="page">
+  <h2 class="big">Kenali komponennya</h2>
+  <div class="grid">
+    <div class="card"><h4>ESP32</h4><p>Membaca sensor, memutuskan status, mengirim data.</p><p class="ana">Otak alat</p></div>
+    <div class="card"><h4>MPU6050 (GY-521)</h4><p>Mengukur kemiringan terhadap gravitasi.</p><p class="ana">Waterpas digital</p></div>
+    <div class="card"><h4>Sensor tanah kapasitif</h4><p>Mengukur seberapa basah tanah.</p><p class="ana">Jari yang ditancap ke tanah</p></div>
+    <div class="card"><h4>Sensor hujan</h4><p>Mendeteksi air di permukaan panel.</p><p class="ana">Telapak tangan yang menadah hujan</p></div>
+    <div class="card"><h4>LED hijau, kuning, merah</h4><p>Menunjukkan status di lokasi.</p><p class="ana">Lampu lalu lintas</p></div>
+    <div class="card"><h4>Buzzer</h4><p>Bunyi peringatan.</p><p class="ana">Peluit</p></div>
+    <div class="card"><h4>Tombol</h4><p>Menetapkan posisi sekarang sebagai "normal".</p><p class="ana">Tombol nol pada timbangan</p></div>
+    <div class="card"><h4>Breadboard dan jumper</h4><p>Menyambung komponen tanpa solder.</p><p class="ana">Papan colok</p></div>
+  </div>
+  <h3>Peta sambungan lengkap</h3>
+  <p class="small">Simpan halaman ini. Semua sambungan di Langkah 5 merujuk ke peta ini.</p>
+  <svg viewBox="0 0 640 458" class="dg" role="img" aria-label="Peta sambungan lengkap">
+<rect x="20" y="10" width="150" height="438" rx="12" fill="#22262b"/>
+<text x="95" y="234.0" class="chip-t" text-anchor="middle" transform="rotate(-90 95 229.0)">ESP32 DevKit</text>
+<circle cx="170" cy="30" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="34" class="pin-e" text-anchor="end">3V3</text>
+<line x1="175" y1="30" x2="330" y2="30" stroke="#e0302a" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="16" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="34" class="pin-k"><tspan font-weight="600">Jalur merah breadboard</tspan> · VCC semua sensor</text>
+<circle cx="170" cy="68" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="72" class="pin-e" text-anchor="end">GND</text>
+<line x1="175" y1="68" x2="330" y2="68" stroke="#1d1d1f" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="54" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="72" class="pin-k"><tspan font-weight="600">Jalur biru breadboard</tspan> · GND semua komponen</text>
+<circle cx="170" cy="106" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="110" class="pin-e" text-anchor="end">GPIO 21</text>
+<line x1="175" y1="106" x2="330" y2="106" stroke="#2f7de1" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="92" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="110" class="pin-k"><tspan font-weight="600">MPU6050</tspan> · SDA</text>
+<circle cx="170" cy="144" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="148" class="pin-e" text-anchor="end">GPIO 22</text>
+<line x1="175" y1="144" x2="330" y2="144" stroke="#e6a100" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="130" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="148" class="pin-k"><tspan font-weight="600">MPU6050</tspan> · SCL</text>
+<circle cx="170" cy="182" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="186" class="pin-e" text-anchor="end">GPIO 34</text>
+<line x1="175" y1="182" x2="330" y2="182" stroke="#16a085" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="168" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="186" class="pin-k"><tspan font-weight="600">Sensor tanah</tspan> · AOUT</text>
+<circle cx="170" cy="220" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="224" class="pin-e" text-anchor="end">GPIO 35</text>
+<line x1="175" y1="220" x2="330" y2="220" stroke="#16a085" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="206" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="224" class="pin-k"><tspan font-weight="600">Modul sensor hujan</tspan> · AO</text>
+<circle cx="170" cy="258" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="262" class="pin-e" text-anchor="end">GPIO 26</text>
+<line x1="175" y1="258" x2="330" y2="258" stroke="#2a9d4b" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="244" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="262" class="pin-k"><tspan font-weight="600">LED hijau</tspan> · lewat resistor</text>
+<circle cx="170" cy="296" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="300" class="pin-e" text-anchor="end">GPIO 27</text>
+<line x1="175" y1="296" x2="330" y2="296" stroke="#e6a100" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="282" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="300" class="pin-k"><tspan font-weight="600">LED kuning</tspan> · lewat resistor</text>
+<circle cx="170" cy="334" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="338" class="pin-e" text-anchor="end">GPIO 14</text>
+<line x1="175" y1="334" x2="330" y2="334" stroke="#e0302a" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="320" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="338" class="pin-k"><tspan font-weight="600">LED merah</tspan> · lewat resistor</text>
+<circle cx="170" cy="372" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="376" class="pin-e" text-anchor="end">GPIO 25</text>
+<line x1="175" y1="372" x2="330" y2="372" stroke="#8a4fd8" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="358" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="376" class="pin-k"><tspan font-weight="600">Buzzer</tspan> · S (sinyal)</text>
+<circle cx="170" cy="410" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="158" y="414" class="pin-e" text-anchor="end">GPIO 15</text>
+<line x1="175" y1="410" x2="330" y2="410" stroke="#5f6b7a" stroke-width="4" stroke-linecap="round"/>
+<rect x="335" y="396" width="285" height="28" rx="8" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="347" y="414" class="pin-k"><tspan font-weight="600">Tombol (kaki lain ke GND)</tspan> · Kaki tombol</text>
+</svg>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">1</span><div><h2>Siapkan laptop</h2><p class="meta">Tidak butuh alat · sekitar 1 jam</p></div></div>
+
+<p>Pasang empat program ini. Semuanya gratis.</p>
+<ol>
+<li><b>Visual Studio Code</b>: code.visualstudio.com</li>
+<li><b>Git</b>: git-scm.com. Di Windows, biarkan semua pilihan bawaan saat memasang.</li>
+<li><b>Python 3.10 atau lebih baru</b>: python.org/downloads. Di Windows, centang <b>"Add python.exe to PATH"</b> di layar pertama.</li>
+<li>Di VS Code, buka Extensions (<code>Ctrl+Shift+X</code>), lalu pasang:
+<ul><li><b>PlatformIO IDE</b>. Tunggu tulisan "Installing PlatformIO Core" di pojok bawah hilang (5–10 menit).</li>
+<li><b>Wokwi Simulator</b>. Tekan <code>F1</code>, ketik <code>Wokwi: Request a New License</code>, ikuti halaman yang terbuka.</li></ul></li>
+</ol>
+<p>Cek di terminal:</p><pre>git --version
+python --version</pre>
+<div class="ok"><b>Berhasil kalau</b> ikon kepala semut (PlatformIO) muncul di bilah kiri VS Code, dan kedua perintah di atas menampilkan nomor versi.</div>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">2</span><div><h2>Ambil kode SIARENG</h2><p class="meta">Tidak butuh alat · 5 menit</p></div></div>
+
+<p>Buka terminal di VS Code (menu Terminal → New Terminal), pindah ke folder tempat menyimpan proyek, lalu jalankan:</p>
+<pre>git clone https://github.com/YusufArrayyan/SIARENG.git</pre>
+<table><tr><th>Folder</th><th>Isi</th></tr>
+<tr><td><code>firmware/</code></td><td>Program yang ditanam ke ESP32</td></tr>
+<tr><td><code>dashboard/</code></td><td>Halaman web pemantau</td></tr>
+<tr><td><code>backend-api/</code></td><td>Program Python penghubung ESP32 dan dashboard</td></tr>
+<tr><td><code>docs/</code></td><td>Panduan, RAB, laporan</td></tr></table>
+<div class="ok"><b>Berhasil kalau</b> folder <code>SIARENG</code> muncul dan berisi folder-folder di atas.</div>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">3</span><div><h2>Coba tanpa alat</h2><p class="meta">Tidak butuh alat · 30 menit</p></div></div>
+
+<h3>3a. Simulasi alat di Wokwi</h3>
+<ol><li>Di VS Code, File → Open Folder, buka <b><code>SIARENG/firmware</code></b> (bukan folder <code>SIARENG</code>).</li>
+<li>Klik ikon PlatformIO → <b>Build</b>. Build pertama lama karena mengunduh perkakas ESP32.</li>
+<li>Tekan <code>F1</code> → <code>Wokwi: Start Simulator</code>.</li>
+<li>Putar potensiometer (tanah dan hujan) dan geser slider MPU6050. Skenario lengkap ada di <code>docs/simulasi-demo.md</code>.</li></ol>
+<h3>3b. Dashboard mode demo</h3>
+<p>Klik dua kali file <code>SIARENG/dashboard/index.html</code>. Di bagian "Kendali demo", tekan <b>Lereng bergerak</b>.
+Setelah 2 detik panel besar berubah menjadi <b>Bahaya</b> dan muncul banner merah.</p>
+<div class="ok"><b>Berhasil kalau</b> LED hijau menyala di simulasi Wokwi, dan saat tanah dibuat jenuh sambil kemiringan digeser, LED merah berkedip.</div>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">4</span><div><h2>Beli komponen</h2><p class="meta">Menunggu kiriman</p></div></div>
+
+<p>Pakai daftar di <code>docs/RAB_SIARENG_hemat.xlsx</code>, sekitar <b>Rp210.000</b> termasuk ongkir. Setiap baris sudah berisi link toko dan varian yang harus dipilih saat checkout.</p>
+<table><tr><th>Komponen</th><th>Jumlah</th></tr>
+<tr><td>ESP32 DevKit + kabel data micro USB</td><td>1</td></tr>
+<tr><td>MPU6050 (GY-521)</td><td>1</td></tr>
+<tr><td>Sensor kelembapan tanah kapasitif v1.2</td><td>1</td></tr>
+<tr><td>Modul sensor hujan (raindrop)</td><td>1</td></tr>
+<tr><td>Buzzer pasif</td><td>1</td></tr>
+<tr><td>LED 5 mm merah, kuning, hijau + resistor 220–330 Ω</td><td>3 + 3</td></tr>
+<tr><td>Push button</td><td>1</td></tr>
+<tr><td>Breadboard 830 titik, jumper male-male dan male-female</td><td>1 + 2 set</td></tr></table>
+<p class="small">Solder belum diperlukan untuk tahap uji. Kalau kabel USB yang kamu punya hanya untuk mengisi daya (tidak bisa transfer data), ESP32 tidak akan terdeteksi.</p>
+<div class="ok"><b>Berhasil kalau</b> semua barang di tabel sudah ada di mejamu.</div>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">5</span><div><h2>Rakit di breadboard</h2><p class="meta">Butuh alat · 2–3 jam</p></div></div>
+<p><b>Kuncinya: pasang satu komponen, uji, baru pasang berikutnya.</b> Kalau semua dipasang sekaligus lalu ada yang salah, sulit mencari penyebabnya.</p>
+<h3>Yang perlu dipahami dulu</h3>
+<svg viewBox="0 0 640 220" class="dg" role="img" aria-label="Cara kerja breadboard">
+<rect x="20" y="10" width="600" height="200" rx="10" fill="#f1efe8" stroke="#c9c6bb"/>
+<line x1="40" y1="26" x2="600" y2="26" stroke="#e0302a" stroke-width="1.5"/>
+<line x1="40" y1="40" x2="600" y2="40" stroke="#2f7de1" stroke-width="1.5"/>
+<line x1="40" y1="180" x2="600" y2="180" stroke="#e0302a" stroke-width="1.5"/>
+<line x1="40" y1="194" x2="600" y2="194" stroke="#2f7de1" stroke-width="1.5"/>
+<rect x="30" y="106" width="580" height="8" fill="#ddd9cc"/>
+<rect x="47" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="47" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="67" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="87" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="107" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="127" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="147" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="167" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="187" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="207" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="227" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="247" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="267" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="287" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="307" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="327" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="347" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="367" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="387" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="407" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="427" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="447" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="467" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="487" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="507" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="527" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="547" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="567" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="53" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="119" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="63" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="129" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="73" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="139" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="83" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="149" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="93" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="587" y="159" width="6" height="6" rx="1" fill="#55524a"/>
+<rect x="183" y="48" width="14" height="52" rx="4" fill="none" stroke="#0066cc" stroke-width="2.5"/>
+<rect x="36" y="20" width="568" height="12" rx="4" fill="none" stroke="#0066cc" stroke-width="2.5"/>
+</svg>
+<p class="cap">Kotak biru: 5 lubang dalam satu kolom pendek saling tersambung. Jalur panjang di tepi (merah = +, biru = −) tersambung sepanjang papan. Celah di tengah memisahkan bagian atas dan bawah.</p>
+<ul>
+<li><b>Label pin ESP32</b> bisa tertulis <code>D21</code>, <code>G21</code>, <code>IO21</code>, atau <code>21</code>. Semuanya berarti GPIO 21.</li>
+<li><b>Cabut kabel USB setiap kali mengubah sambungan.</b></li>
+<li><b>Semua sensor diberi daya dari pin <code>3V3</code></b>, jangan dari <code>VIN</code> atau <code>5V</code>.</li>
+<li>Warna kabel di gambar hanya penanda. Kamu boleh memakai warna apa saja, asalkan sambungannya sama.</li>
+</ul>
+</section>
+
+<section class="substep"><h3><span class="snum">5.1</span>ESP32 saja</h3><svg viewBox="0 0 640 170" class="dg" role="img" aria-label="ESP32 ke breadboard">
+<rect x="20" y="16" width="170" height="138" rx="12" fill="#22262b"/>
+<rect x="55" y="47.0" width="80" height="62" rx="4" fill="#b8bcc2"/>
+<text x="95" y="83.0" class="chip-t" text-anchor="middle">ESP32</text>
+<rect x="80" y="140" width="30" height="14" rx="2" fill="#8d9096"/>
+<rect x="440" y="42.0" width="180" height="86" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="530" y="34.0" class="lbl" text-anchor="middle">Breadboard</text>
+<circle cx="190" cy="68.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="72.0" class="pin-e" text-anchor="end">3V3</text>
+<path d="M195 68.0 C 300 68.0, 330 68.0, 435 68.0" stroke="#e0302a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="68.0" r="5" fill="#fff" stroke="#e0302a" stroke-width="2.5"/>
+<text x="454" y="72.0" class="pin-k">Jalur merah (+)</text>
+<circle cx="190" cy="102.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="106.0" class="pin-e" text-anchor="end">GND</text>
+<path d="M195 102.0 C 300 102.0, 330 102.0, 435 102.0" stroke="#1d1d1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="102.0" r="5" fill="#fff" stroke="#1d1d1f" stroke-width="2.5"/>
+<text x="454" y="106.0" class="pin-k">Jalur biru (−)</text>
+</svg>
+<ol><li>Tancapkan ESP32 melintang di atas celah tengah. Kalau papanmu versi lebar (38 pin) dan satu sisi tidak menyisakan lubang,
+pin di sisi itu disambung dengan jumper <b>male-female</b> langsung ke kaki ESP32.</li>
+<li>Buka <code>firmware/include/config.h</code>, ubah <code>#define SIMULASI 1</code> menjadi <code>0</code>.</li>
+<li>Colokkan USB. Di VS Code (folder <code>firmware</code> terbuka): PlatformIO → <b>Upload</b>. Kalau berhenti di <code>Connecting.....</code>, tahan tombol <b>BOOT</b> di ESP32.</li>
+<li>PlatformIO → <b>Monitor</b>.</li></ol>
+<p class="small">Port tidak terdeteksi? Lihat chip kecil di dekat port USB ESP32: <b>CP2102</b> (pasang driver "CP210x" dari Silicon Labs) atau <b>CH340</b> (pasang driver "CH340").</p>
+<div class="ok"><b>Berhasil kalau</b> Monitor menampilkan <code>{"event":"boot"}</code> lalu <code>MPU6050 tidak terdeteksi</code>. Pesan error ini wajar karena sensornya belum dipasang.</div></section>
+
+<section class="substep"><h3><span class="snum">5.2</span>MPU6050 (kemiringan)</h3><svg viewBox="0 0 640 196" class="dg" role="img" aria-label="MPU6050">
+<rect x="20" y="16" width="170" height="164" rx="12" fill="#22262b"/>
+<rect x="55" y="60.0" width="80" height="62" rx="4" fill="#b8bcc2"/>
+<text x="95" y="96.0" class="chip-t" text-anchor="middle">ESP32</text>
+<rect x="80" y="166" width="30" height="14" rx="2" fill="#8d9096"/>
+<rect x="440" y="21.0" width="180" height="154" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="530" y="13.0" class="lbl" text-anchor="middle">MPU6050 (GY-521)</text>
+<circle cx="190" cy="47.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="51.0" class="pin-e" text-anchor="end">3V3</text>
+<path d="M195 47.0 C 300 47.0, 330 47.0, 435 47.0" stroke="#e0302a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="47.0" r="5" fill="#fff" stroke="#e0302a" stroke-width="2.5"/>
+<text x="454" y="51.0" class="pin-k">VCC</text>
+<circle cx="190" cy="81.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="85.0" class="pin-e" text-anchor="end">GND</text>
+<path d="M195 81.0 C 300 81.0, 330 81.0, 435 81.0" stroke="#1d1d1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="81.0" r="5" fill="#fff" stroke="#1d1d1f" stroke-width="2.5"/>
+<text x="454" y="85.0" class="pin-k">GND</text>
+<circle cx="190" cy="115.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="119.0" class="pin-e" text-anchor="end">GPIO 21</text>
+<path d="M195 115.0 C 300 115.0, 330 115.0, 435 115.0" stroke="#2f7de1" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="115.0" r="5" fill="#fff" stroke="#2f7de1" stroke-width="2.5"/>
+<text x="454" y="119.0" class="pin-k">SDA</text>
+<circle cx="190" cy="149.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="153.0" class="pin-e" text-anchor="end">GPIO 22</text>
+<path d="M195 149.0 C 300 149.0, 330 149.0, 435 149.0" stroke="#e6a100" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="149.0" r="5" fill="#fff" stroke="#e6a100" stroke-width="2.5"/>
+<text x="454" y="153.0" class="pin-k">SCL</text>
+</svg>
+<p>Colok USB lagi, lalu tekan tombol <b>EN</b> (atau RST) di ESP32 untuk memulai ulang.</p>
+<div class="ok"><b>Berhasil kalau</b> pesan error hilang, muncul <code>baseline_siap</code>, lalu baris data tiap 2 detik. Saat breadboard dimiringkan, nilai <code>tilt_delta_deg</code> naik.</div></section>
+
+<section class="substep"><h3><span class="snum">5.3</span>Tiga LED</h3><svg viewBox="0 0 640 196" class="dg" role="img" aria-label="LED">
+<rect x="20" y="16" width="170" height="164" rx="12" fill="#22262b"/>
+<rect x="55" y="60.0" width="80" height="62" rx="4" fill="#b8bcc2"/>
+<text x="95" y="96.0" class="chip-t" text-anchor="middle">ESP32</text>
+<rect x="80" y="166" width="30" height="14" rx="2" fill="#8d9096"/>
+<rect x="440" y="21.0" width="180" height="154" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="530" y="13.0" class="lbl" text-anchor="middle">3 LED + 3 resistor</text>
+<circle cx="190" cy="47.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="51.0" class="pin-e" text-anchor="end">GPIO 26</text>
+<path d="M195 47.0 C 300 47.0, 330 47.0, 435 47.0" stroke="#2a9d4b" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="47.0" r="5" fill="#fff" stroke="#2a9d4b" stroke-width="2.5"/>
+<text x="454" y="51.0" class="pin-k">Resistor → kaki panjang LED hijau</text>
+<circle cx="190" cy="81.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="85.0" class="pin-e" text-anchor="end">GPIO 27</text>
+<path d="M195 81.0 C 300 81.0, 330 81.0, 435 81.0" stroke="#e6a100" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="81.0" r="5" fill="#fff" stroke="#e6a100" stroke-width="2.5"/>
+<text x="454" y="85.0" class="pin-k">Resistor → kaki panjang LED kuning</text>
+<circle cx="190" cy="115.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="119.0" class="pin-e" text-anchor="end">GPIO 14</text>
+<path d="M195 115.0 C 300 115.0, 330 115.0, 435 115.0" stroke="#e0302a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="115.0" r="5" fill="#fff" stroke="#e0302a" stroke-width="2.5"/>
+<text x="454" y="119.0" class="pin-k">Resistor → kaki panjang LED merah</text>
+<circle cx="190" cy="149.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="153.0" class="pin-e" text-anchor="end">GND</text>
+<path d="M195 149.0 C 300 149.0, 330 149.0, 435 149.0" stroke="#1d1d1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="149.0" r="5" fill="#fff" stroke="#1d1d1f" stroke-width="2.5"/>
+<text x="454" y="153.0" class="pin-k">Kaki pendek ketiga LED</text>
+</svg>
+<p>Kaki <b>panjang</b> LED (anoda) disambung ke resistor, ujung resistor lain ke GPIO. Kaki <b>pendek</b> (katoda) ke jalur biru.
+LED yang terbalik tidak rusak, hanya tidak menyala.</p>
+<div class="ok"><b>Berhasil kalau</b> setelah restart, LED kuning menyala 2 detik (alat mengambil patokan kemiringan), lalu berganti hijau. Miringkan breadboard lebih dari 2°: setelah 2 detik LED kuning menyala.</div></section>
+
+<section class="substep"><h3><span class="snum">5.4</span>Buzzer</h3><svg viewBox="0 0 640 170" class="dg" role="img" aria-label="Buzzer">
+<rect x="20" y="16" width="170" height="138" rx="12" fill="#22262b"/>
+<rect x="55" y="47.0" width="80" height="62" rx="4" fill="#b8bcc2"/>
+<text x="95" y="83.0" class="chip-t" text-anchor="middle">ESP32</text>
+<rect x="80" y="140" width="30" height="14" rx="2" fill="#8d9096"/>
+<rect x="440" y="25.0" width="180" height="120" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="530" y="17.0" class="lbl" text-anchor="middle">Buzzer pasif</text>
+<circle cx="190" cy="51.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="55.0" class="pin-e" text-anchor="end">GPIO 25</text>
+<path d="M195 51.0 C 300 51.0, 330 51.0, 435 51.0" stroke="#8a4fd8" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="51.0" r="5" fill="#fff" stroke="#8a4fd8" stroke-width="2.5"/>
+<text x="454" y="55.0" class="pin-k">S atau I/O (sinyal)</text>
+<circle cx="190" cy="85.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="89.0" class="pin-e" text-anchor="end">GND</text>
+<path d="M195 85.0 C 300 85.0, 330 85.0, 435 85.0" stroke="#1d1d1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="85.0" r="5" fill="#fff" stroke="#1d1d1f" stroke-width="2.5"/>
+<text x="454" y="89.0" class="pin-k">− atau GND</text>
+<circle cx="190" cy="119.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="123.0" class="pin-e" text-anchor="end">3V3</text>
+<path d="M195 119.0 C 300 119.0, 330 119.0, 435 119.0" stroke="#e0302a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="119.0" r="5" fill="#fff" stroke="#e0302a" stroke-width="2.5"/>
+<text x="454" y="123.0" class="pin-k">+ atau VCC (kalau ada)</text>
+</svg>
+<div class="ok"><b>Berhasil kalau</b> saat status waspada (breadboard dimiringkan), terdengar bip pendek tiap 3 detik.</div></section>
+
+<section class="substep"><h3><span class="snum">5.5</span>Tombol kalibrasi</h3><svg viewBox="0 0 640 170" class="dg" role="img" aria-label="Tombol">
+<rect x="20" y="16" width="170" height="138" rx="12" fill="#22262b"/>
+<rect x="55" y="47.0" width="80" height="62" rx="4" fill="#b8bcc2"/>
+<text x="95" y="83.0" class="chip-t" text-anchor="middle">ESP32</text>
+<rect x="80" y="140" width="30" height="14" rx="2" fill="#8d9096"/>
+<rect x="440" y="42.0" width="180" height="86" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="530" y="34.0" class="lbl" text-anchor="middle">Push button</text>
+<circle cx="190" cy="68.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="72.0" class="pin-e" text-anchor="end">GPIO 15</text>
+<path d="M195 68.0 C 300 68.0, 330 68.0, 435 68.0" stroke="#5f6b7a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="68.0" r="5" fill="#fff" stroke="#5f6b7a" stroke-width="2.5"/>
+<text x="454" y="72.0" class="pin-k">Kaki 1</text>
+<circle cx="190" cy="102.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="106.0" class="pin-e" text-anchor="end">GND</text>
+<path d="M195 102.0 C 300 102.0, 330 102.0, 435 102.0" stroke="#1d1d1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="102.0" r="5" fill="#fff" stroke="#1d1d1f" stroke-width="2.5"/>
+<text x="454" y="106.0" class="pin-k">Kaki diagonal</text>
+</svg>
+<p>Tancapkan tombol melintang di celah tengah breadboard. Pakai dua kaki yang berseberangan secara diagonal.</p>
+<div class="ok"><b>Berhasil kalau</b> saat ditekan, Monitor menampilkan <code>kalibrasi_ulang</code>, dan posisi miring saat itu dianggap normal (LED kembali hijau).</div></section>
+
+<section class="substep"><h3><span class="snum">5.6</span>Sensor tanah</h3><svg viewBox="0 0 640 170" class="dg" role="img" aria-label="Sensor tanah">
+<rect x="20" y="16" width="170" height="138" rx="12" fill="#22262b"/>
+<rect x="55" y="47.0" width="80" height="62" rx="4" fill="#b8bcc2"/>
+<text x="95" y="83.0" class="chip-t" text-anchor="middle">ESP32</text>
+<rect x="80" y="140" width="30" height="14" rx="2" fill="#8d9096"/>
+<rect x="440" y="25.0" width="180" height="120" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="530" y="17.0" class="lbl" text-anchor="middle">Sensor tanah kapasitif</text>
+<circle cx="190" cy="51.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="55.0" class="pin-e" text-anchor="end">3V3</text>
+<path d="M195 51.0 C 300 51.0, 330 51.0, 435 51.0" stroke="#e0302a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="51.0" r="5" fill="#fff" stroke="#e0302a" stroke-width="2.5"/>
+<text x="454" y="55.0" class="pin-k">VCC</text>
+<circle cx="190" cy="85.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="89.0" class="pin-e" text-anchor="end">GND</text>
+<path d="M195 85.0 C 300 85.0, 330 85.0, 435 85.0" stroke="#1d1d1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="85.0" r="5" fill="#fff" stroke="#1d1d1f" stroke-width="2.5"/>
+<text x="454" y="89.0" class="pin-k">GND</text>
+<circle cx="190" cy="119.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="123.0" class="pin-e" text-anchor="end">GPIO 34</text>
+<path d="M195 119.0 C 300 119.0, 330 119.0, 435 119.0" stroke="#16a085" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="119.0" r="5" fill="#fff" stroke="#16a085" stroke-width="2.5"/>
+<text x="454" y="123.0" class="pin-k">AOUT</text>
+</svg>
+<p>Bagian yang boleh basah hanya sampai garis putih di badan sensor. Komponen elektronik di bagian atas harus tetap kering.</p>
+<div class="ok"><b>Berhasil kalau</b> nilai <code>soil_raw</code> berubah saat bagian bawah sensor digenggam atau dicelup ke air.</div></section>
+
+<section class="substep"><h3><span class="snum">5.7</span>Sensor hujan</h3><svg viewBox="0 0 640 170" class="dg" role="img" aria-label="Sensor hujan">
+<rect x="20" y="16" width="170" height="138" rx="12" fill="#22262b"/>
+<rect x="55" y="47.0" width="80" height="62" rx="4" fill="#b8bcc2"/>
+<text x="95" y="83.0" class="chip-t" text-anchor="middle">ESP32</text>
+<rect x="80" y="140" width="30" height="14" rx="2" fill="#8d9096"/>
+<rect x="440" y="25.0" width="180" height="120" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="530" y="17.0" class="lbl" text-anchor="middle">Modul komparator hujan</text>
+<circle cx="190" cy="51.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="55.0" class="pin-e" text-anchor="end">3V3</text>
+<path d="M195 51.0 C 300 51.0, 330 51.0, 435 51.0" stroke="#e0302a" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="51.0" r="5" fill="#fff" stroke="#e0302a" stroke-width="2.5"/>
+<text x="454" y="55.0" class="pin-k">VCC</text>
+<circle cx="190" cy="85.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="89.0" class="pin-e" text-anchor="end">GND</text>
+<path d="M195 85.0 C 300 85.0, 330 85.0, 435 85.0" stroke="#1d1d1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="85.0" r="5" fill="#fff" stroke="#1d1d1f" stroke-width="2.5"/>
+<text x="454" y="89.0" class="pin-k">GND</text>
+<circle cx="190" cy="119.0" r="5" fill="#d9b44a" stroke="#22262b" stroke-width="2"/>
+<text x="178" y="123.0" class="pin-e" text-anchor="end">GPIO 35</text>
+<path d="M195 119.0 C 300 119.0, 330 119.0, 435 119.0" stroke="#16a085" stroke-width="4" fill="none" stroke-linecap="round"/>
+<circle cx="440" cy="119.0" r="5" fill="#fff" stroke="#16a085" stroke-width="2.5"/>
+<text x="454" y="123.0" class="pin-k">AO (bukan DO)</text>
+</svg>
+<p>Sensor hujan terdiri dari panel bergaris dan modul kecil. Sambungkan panel ke modul dengan dua kabel pendek bawaannya. Pin <b>DO</b> tidak dipakai.</p>
+<div class="ok"><b>Berhasil kalau</b> nilai <code>rain_raw</code> turun saat panel ditetesi air. Rangkaianmu sekarang lengkap.</div></section>
+
+<section class="step">
+<div class="step-head"><span class="num">6</span><div><h2>Kalibrasi sensor</h2><p class="meta">Butuh alat · 30 menit</p></div></div>
+
+<p>Setiap sensor sedikit berbeda, jadi alat perlu tahu angka "kering" dan "basah" milik sensormu. Lihat nilai <code>soil_raw</code> dan <code>rain_raw</code> di Monitor.</p>
+<table><tr><th>Yang diukur</th><th>Caranya</th><th>Isi ke <code>config.h</code></th></tr>
+<tr><td>Tanah kering</td><td>Sensor dibiarkan di udara</td><td><code>SOIL_RAW_KERING</code></td></tr>
+<tr><td>Tanah basah</td><td>Sensor dicelup air sampai garis batas</td><td><code>SOIL_RAW_BASAH</code></td></tr>
+<tr><td>Hujan kering</td><td>Panel dilap sampai kering</td><td><code>RAIN_RAW_KERING</code></td></tr>
+<tr><td>Hujan basah</td><td>Seluruh panel dibasahi</td><td><code>RAIN_RAW_BASAH</code></td></tr></table>
+<p>Isi keempat angka di blok <code>#else</code> ("NILAI CONTOH untuk sensor asli") di <code>firmware/include/config.h</code>:</p>
+<pre>constexpr int SOIL_RAW_KERING = 3200;   // ganti dengan hasil ukurmu
+constexpr int SOIL_RAW_BASAH  = 1400;
+constexpr int RAIN_RAW_KERING = 4095;
+constexpr int RAIN_RAW_BASAH  = 1200;</pre>
+<p>Upload lagi, lalu uji skenario bahaya: celup sensor tanah, miringkan breadboard lebih dari 5°, tunggu 2 detik.</p>
+<div class="ok"><b>Berhasil kalau</b> <code>soil_pct</code> mendekati 0 di udara dan mendekati 100 di air, dan pada skenario bahaya LED merah berkedip serta buzzer berbunyi.</div>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">7</span><div><h2>Sambungkan ke dashboard lewat USB</h2><p class="meta">Butuh alat · 15 menit</p></div></div>
+
+<p>Siapkan backend, cukup sekali. Buka terminal di folder <code>SIARENG/backend-api</code>:</p>
+<pre>python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt</pre>
+<p>Cari nomor port ESP32 di Device Manager → Ports (COM &amp; LPT), misalnya <code>COM5</code>.
+<b>Tutup Monitor PlatformIO</b> karena satu port hanya bisa dipakai satu program. Lalu jalankan backend:</p>
+<p class="small">Git Bash:</p><pre>SERIAL_PORT=COM5 .venv/Scripts/python -m uvicorn app:app --host 0.0.0.0 --port 8000</pre>
+<p class="small">PowerShell:</p><pre>$env:SERIAL_PORT="COM5"; .venv\Scripts\python -m uvicorn app:app --host 0.0.0.0 --port 8000</pre>
+<p>Buka <b>http://localhost:8000</b> di browser.</p>
+<div class="ok"><b>Berhasil kalau</b> pojok kanan atas dashboard bertuliskan "Menerima data dari alat", dan angka di layar ikut berubah saat sensor dibasahi atau breadboard dimiringkan.</div>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">8</span><div><h2>Kirim data lewat WiFi</h2><p class="meta">Butuh alat · 30 menit</p></div></div>
+
+<p>Dengan WiFi, alat tidak perlu menempel ke laptop. Cukup beri daya dari adaptor atau powerbank.</p>
+<svg viewBox="0 0 640 170" class="dg" role="img" aria-label="ESP32 dan laptop di WiFi yang sama">
+<defs><marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 1L9 5L1 9z" fill="#0066cc"/></marker></defs>
+<rect x="20" y="50" width="150" height="70" rx="12" fill="#e6f1fb" stroke="#b5d4f4"/>
+<text x="95" y="80" class="lbl" text-anchor="middle">ESP32</text><text x="95" y="100" class="sub" text-anchor="middle">di lereng</text>
+<rect x="245" y="50" width="150" height="70" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="320" y="80" class="lbl" text-anchor="middle">Router / hotspot</text><text x="320" y="100" class="sub" text-anchor="middle">WiFi 2,4 GHz</text>
+<rect x="470" y="50" width="150" height="70" rx="12" fill="#f5f5f7" stroke="#d2d2d7"/>
+<text x="545" y="80" class="lbl" text-anchor="middle">Laptop</text><text x="545" y="100" class="sub" text-anchor="middle">192.168.1.10:8000</text>
+<line x1="172" y1="85" x2="240" y2="85" stroke="#0066cc" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#ah2)"/>
+<line x1="397" y1="85" x2="465" y2="85" stroke="#0066cc" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#ah2)"/>
+<text x="320" y="150" class="sub" text-anchor="middle">ESP32 mengirim ke alamat IP laptop. Keduanya harus tersambung ke WiFi yang sama.</text>
+</svg>
+<ol>
+<li>Cari IP laptop: jalankan <code>ipconfig</code>, catat angka di baris <b>IPv4 Address</b>, misalnya <code>192.168.1.10</code>.</li>
+<li>Di <code>firmware/include/</code>, salin <code>secrets.example.h</code> menjadi <code>secrets.h</code>, lalu isi:
+<pre>#define WIFI_SSID  "nama WiFi kamu"
+#define WIFI_PASS  "kata sandi WiFi"
+#define SERVER_URL "http://192.168.1.10:8000/api/telemetry"
+#define API_KEY    ""</pre>
+<span class="small">File <code>secrets.h</code> tidak ikut ter-commit ke GitHub, jadi kata sandi WiFi tidak tersebar.</span></li>
+<li>Di <code>config.h</code>, ubah <code>#define KIRIM_WIFI 0</code> menjadi <code>1</code>, lalu Upload.</li>
+<li>Jalankan backend seperti Langkah 7. Bagian <code>SERIAL_PORT=COM5</code> boleh dihapus.</li>
+<li>Saat Windows bertanya soal firewall, pilih <b>Allow access</b>.</li>
+</ol>
+<div class="note"><b>Syarat WiFi:</b> ESP32 dan laptop di jaringan yang sama, dan jaringannya <b>2,4 GHz</b> (ESP32 tidak bisa 5 GHz). Hotspot HP bisa dipakai.
+Dashboard juga bisa dibuka dari HP di WiFi yang sama: <code>http://192.168.1.10:8000</code>.</div>
+<p class="small"><b>Kunci API (disarankan).</b> Isi kata kunci yang sama di <code>secrets.h</code> (<code>API_KEY</code>) dan saat menjalankan backend (<code>API_KEY=kunci-kamu</code> di depan perintah), supaya server hanya menerima data dari alatmu.</p>
+<div class="ok"><b>Berhasil kalau</b> Monitor menampilkan <code>{"event":"wifi","ip":...}</code>, dan dashboard tetap menerima data setelah kabel USB dicabut dan ESP32 diberi daya dari adaptor atau powerbank.</div>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">9</span><div><h2>Peringatan ke Telegram (opsional)</h2><p class="meta">Butuh alat · 20 menit</p></div></div>
+
+<ol>
+<li>Di Telegram, buka <b>@BotFather</b>, kirim <code>/newbot</code>, ikuti petunjuknya, dan simpan <b>token</b> yang diberikan. Perlakukan token seperti kata sandi.</li>
+<li>Kirim pesan apa saja ke bot barumu.</li>
+<li>Buka <code>https://api.telegram.org/botTOKEN/getUpdates</code> di browser (ganti TOKEN), lalu cari angka setelah <code>"chat":{"id":</code>. Itu <b>chat ID</b>.</li>
+<li>Jalankan backend dengan dua pengaturan tambahan:
+<pre>TELEGRAM_BOT_TOKEN=token-kamu TELEGRAM_CHAT_ID=123456789 \
+  .venv/Scripts/python -m uvicorn app:app --host 0.0.0.0 --port 8000</pre></li>
+</ol>
+<p>Pesan dikirim setiap status berubah, dan saat alat berhenti mengirim data lebih dari 60 detik.</p>
+<div class="ok"><b>Berhasil kalau</b> saat kamu memicu status waspada di alat, pesan masuk ke Telegram dalam beberapa detik.</div>
+</section>
+
+<section class="step">
+<div class="step-head"><span class="num">10</span><div><h2>Pasang di lapangan</h2><p class="meta">Lihat panduan perakitan</p></div></div>
+
+<p>Setelah semuanya bekerja di meja, lanjutkan ke <code>docs/panduan-perakitan.md</code>: pemindahan ke PCB, catu daya panel surya, box tahan air, dan pemasangan di lereng.</p>
+<p>Di lereng, alat butuh WiFi untuk mengirim data: router atau modem 4G di dekat lokasi, atau hotspot HP yang ditinggal.
+Kalau lokasinya tanpa sinyal, alat tetap berfungsi sebagai alarm lokal lewat LED dan buzzer.</p>
+<div class="warn">Minta izin pemilik lahan, beri tahu warga atau perangkat desa, jangan memasang saat hujan, dan pergi minimal berdua.</div>
+<div class="ok"><b>Berhasil kalau</b> alat terpasang tegak di tiang, LED hijau menyala setelah tombol kalibrasi ditekan, dan dashboard menerima data dari lokasi.</div>
+</section>
+
+<section class="page">
+  <h2 class="big">Kalau ada masalah</h2>
+  <table class="trouble">
+    <tr><th>Gejala</th><th>Penyebab paling sering</th><th>Cara mengatasi</th></tr>
+    <tr><td>Upload berhenti di <code>Connecting.....</code></td><td>ESP32 belum masuk mode upload</td><td>Tahan tombol BOOT sampai upload berjalan</td></tr>
+    <tr><td>Port COM tidak muncul</td><td>Driver belum terpasang, atau kabel hanya untuk cas</td><td>Pasang driver CP210x atau CH340. Coba kabel lain</td></tr>
+    <tr><td><code>MPU6050 tidak terdeteksi</code></td><td>SDA dan SCL tertukar, atau kabel longgar</td><td>SDA ke GPIO 21, SCL ke GPIO 22, VCC ke 3V3</td></tr>
+    <tr><td>LED tidak menyala</td><td>LED terbalik</td><td>Kaki panjang ke resistor, kaki pendek ke GND</td></tr>
+    <tr><td><code>soil_raw</code> / <code>rain_raw</code> tidak berubah</td><td>Kabel sinyal salah pin</td><td>Tanah ke GPIO 34, hujan ke GPIO 35 (pin AO)</td></tr>
+    <tr><td>Persen terbalik (basah = 0%)</td><td>Nilai kering dan basah tertukar</td><td>Tukar kedua angka di <code>config.h</code></td></tr>
+    <tr><td>Langsung waspada padahal diam</td><td>Patokan diambil saat alat masih bergerak</td><td>Diamkan alat, tekan tombol kalibrasi</td></tr>
+    <tr><td>Backend: <code>could not open port</code></td><td>Port dipakai Monitor, atau nomor salah</td><td>Tutup Monitor. Cek Device Manager</td></tr>
+    <tr><td>Dashboard: "Alat tidak mengirim data"</td><td>ESP32 belum tersambung ke backend</td><td>USB: cek <code>SERIAL_PORT</code>. WiFi: cek <code>SERVER_URL</code> dan firewall</td></tr>
+    <tr><td><code>kirim_gagal</code>, <code>"http":-1</code></td><td>ESP32 tidak menjangkau laptop</td><td>WiFi sama, IP benar, backend pakai <code>--host 0.0.0.0</code></td></tr>
+    <tr><td><code>kirim_gagal</code>, <code>"http":401</code></td><td>Kunci API berbeda</td><td>Samakan <code>API_KEY</code> di <code>secrets.h</code> dan backend</td></tr>
+    <tr><td>Tidak pernah muncul event <code>wifi</code></td><td>Nama/sandi WiFi salah, atau WiFi 5 GHz</td><td>Periksa <code>secrets.h</code>. Pakai 2,4 GHz</td></tr>
+  </table>
+</section>
+
+<section class="page">
+  <h2 class="big">Kamus singkat</h2>
+  <table>
+    <tr><th>Istilah</th><th>Arti</th></tr>
+    <tr><td>Firmware</td><td>Program yang ditanam di dalam ESP32</td></tr>
+    <tr><td>Upload / flash</td><td>Mengirim firmware dari laptop ke ESP32</td></tr>
+    <tr><td>GPIO</td><td>Kaki ESP32 yang bisa membaca atau mengendalikan sesuatu</td></tr>
+    <tr><td>ADC</td><td>Bagian ESP32 yang mengubah tegangan sensor menjadi angka 0–4095</td></tr>
+    <tr><td>I2C</td><td>Cara komunikasi dua kabel (SDA dan SCL) yang dipakai MPU6050</td></tr>
+    <tr><td>Serial Monitor</td><td>Jendela untuk membaca teks yang dikirim ESP32 lewat USB</td></tr>
+    <tr><td>JSON</td><td>Format teks data, contoh <code>{"status":"aman","soil_pct":20}</code></td></tr>
+    <tr><td>Backend</td><td>Program di laptop atau server yang menerima dan menyimpan data</td></tr>
+    <tr><td>Dashboard</td><td>Halaman web untuk memantau data</td></tr>
+    <tr><td>Telemetri</td><td>Data pengukuran yang dikirim alat secara berkala</td></tr>
+    <tr><td>Kalibrasi</td><td>Menyesuaikan pembacaan alat dengan kondisi sebenarnya</td></tr>
+  </table>
+  <div class="end">
+    <p><b>Dokumen terkait di repositori</b></p>
+    <p><code>docs/panduan-perakitan.md</code> · versi lapangan dengan panel surya dan box IP65<br>
+    <code>docs/RAB_SIARENG_hemat.xlsx</code> · daftar belanja uji<br>
+    <code>docs/simulasi-demo.md</code> · skenario demo di kelas<br>
+    <code>backend-api/README.md</code> · pengaturan server</p>
+  </div>
+</section>
+</body></html>
