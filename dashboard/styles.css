@@ -121,9 +121,14 @@ button { font: inherit; color: inherit; }
 
 /* Hero status */
 .hero {
-  border-radius: var(--r-lg); padding: 48px 40px; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap;
+  --sc-ground: #dccfb4; --sc-wet: #7a5a2e; --sc-line: #1d1d1f; --sc-box: #ffffff;
+  border-radius: var(--r-lg); padding: 44px 40px; display: flex; justify-content: space-between; align-items: center; gap: 32px; flex-wrap: wrap;
   background: var(--ok-bg); color: var(--ink); transition: background-color 0.4s ease;
 }
+.hero-text { flex: 1 1 340px; min-width: 0; }
+.hero[data-status="diam"] { background: var(--chip); }
+.hero[data-status="diam"] .hero-title, .hero[data-status="diam"] .hero-icon { color: var(--ink-2); }
+.hero[data-status="bahaya"] { --sc-ground: #4a4034; --sc-wet: #8a6a3a; --sc-line: #f5f5f7; --sc-box: #2c2c2e; }
 .hero[data-status="waspada"] { background: var(--warn-bg); }
 .hero[data-status="bahaya"] { background: #1d1d1f; color: #fff; }
 .eyebrow { font-size: 14px; letter-spacing: -0.224px; color: var(--ink-2); }
@@ -139,7 +144,7 @@ button { font: inherit; color: inherit; }
 .hero-reason { margin-top: 12px; font: 400 24px/1.35 var(--font-display); letter-spacing: 0.1px; max-width: 34ch; }
 .hero-meta { margin-top: 16px; font-size: 14px; color: var(--ink-2); letter-spacing: -0.224px; }
 
-.ladder { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; }
+.ladder { list-style: none; margin: 24px 0 0; padding: 0; display: flex; gap: 8px; flex-wrap: wrap; }
 .ladder li {
   display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: var(--r-pill);
   font-size: 14px; letter-spacing: -0.224px; color: var(--ink-2); background: var(--chip);
@@ -161,6 +166,19 @@ button { font: inherit; color: inherit; }
 /* Kartu metrik */
 .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .metric-head { display: flex; align-items: center; gap: 8px; color: var(--ink-2); }
+.metric-head h2 { flex: 1; }
+.chip { padding: 2px 10px; border-radius: var(--r-pill); background: var(--chip); color: var(--ink); font-size: 12px; font-weight: 600; letter-spacing: 0; white-space: nowrap; }
+.metric[data-level="aman"] .chip { background: var(--ok-bg); color: var(--ok); }
+.metric[data-level="waspada"] .chip { background: var(--warn-bg); color: var(--warn); }
+.metric[data-level="bahaya"] .chip { background: var(--danger-bg); color: var(--danger); }
+.metric-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-top: 12px; }
+.metric-row .metric-value { margin-top: 0; }
+.spark { width: 45%; max-width: 150px; height: 36px; overflow: visible; }
+.spark polyline { fill: none; stroke: var(--ink-2); stroke-width: 1.6; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.metric[data-level="aman"] .spark polyline { stroke: var(--ok); }
+.metric[data-level="waspada"] .spark polyline { stroke: var(--warn); }
+.metric[data-level="bahaya"] .spark polyline { stroke: var(--danger); }
+.stale .metric .num, .stale .spark { opacity: 0.45; }
 .metric-head h2 { font: 600 14px/1.29 var(--font-text); letter-spacing: -0.224px; color: var(--ink-2); }
 .metric-value { margin-top: 12px; font: 600 48px/1 var(--font-display); letter-spacing: -0.8px; font-variant-numeric: tabular-nums; }
 .metric-value .unit { font-size: 24px; font-weight: 400; color: var(--ink-2); margin-left: 4px; letter-spacing: 0; }
@@ -182,8 +200,16 @@ button { font: inherit; color: inherit; }
   min-height: 32px; padding: 4px 16px; border: 0; border-radius: 7px; background: transparent;
   font-size: 14px; letter-spacing: -0.224px; cursor: pointer;
 }
-.segmented button[aria-selected="true"] { background: var(--card); font-weight: 600; box-shadow: 0 0 0 0.5px var(--hairline-soft); }
-.chart-wrap { position: relative; height: 280px; margin-top: 20px; }
+.segmented button[aria-pressed="true"] { background: var(--card); font-weight: 600; box-shadow: 0 0 0 0.5px var(--hairline-soft); }
+.chart-controls { display: flex; gap: 8px; flex-wrap: wrap; }
+.chart-wrap { position: relative; height: 300px; margin-top: 20px; touch-action: pan-y; }
+.tip {
+  position: absolute; top: 4px; transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+  padding: 6px 10px; border-radius: var(--r-sm); background: var(--ink); color: var(--card);
+  font-size: 13px; letter-spacing: -0.1px; font-variant-numeric: tabular-nums;
+}
+.tip b { font-weight: 600; }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 #chart { width: 100%; height: 100%; display: block; }
 
 /* Dua kolom */
@@ -238,4 +264,43 @@ input[type="range"] { width: 100%; height: 28px; accent-color: var(--primary); c
   .brand-sub { display: none; }
   .hero-title { font-size: 40px; }
   .chart-wrap { height: 220px; }
+}
+
+/* Ilustrasi lereng */
+.scene { margin: 0; flex: 0 1 300px; color: var(--sc-line); }
+.scene svg { display: block; width: 100%; height: auto; }
+.scene figcaption { margin-top: 6px; font-size: 12px; line-height: 1.35; letter-spacing: -0.12px; color: var(--ink-2); text-align: center; }
+.hero[data-status="bahaya"] .scene figcaption { color: #a1a1a6; }
+.sc-ground { fill: var(--sc-ground); }
+.sc-wet { fill: var(--sc-wet); opacity: 0; transition: opacity 0.6s ease; }
+.sc-surface { stroke: currentColor; stroke-width: 2; fill: none; opacity: 0.55; }
+.sc-ghost { stroke: currentColor; stroke-width: 1.5; stroke-dasharray: 4 5; opacity: 0.35; }
+.sc-pole { stroke: currentColor; stroke-width: 4; stroke-linecap: round; }
+.sc-box { fill: var(--sc-box); stroke: currentColor; stroke-width: 2; }
+.sc-panel { stroke: currentColor; stroke-width: 4; stroke-linecap: round; }
+.sc-probe { fill: none; stroke: currentColor; stroke-width: 1.5; opacity: 0.7; }
+.sc-led { fill: var(--ok); }
+.hero[data-status="waspada"] .sc-led { fill: var(--warn); }
+.hero[data-status="bahaya"] .sc-led { fill: #ff453a; }
+.hero[data-status="diam"] .sc-led { fill: var(--ink-2); }
+#sc-pole { transform-origin: 170px 122px; transform-box: view-box; transition: transform 0.5s ease; }
+.sc-rain path { stroke: #378add; stroke-width: 2; stroke-linecap: round; fill: none; }
+.sc-rain { opacity: 0; transition: opacity 0.6s ease; }
+@media (prefers-reduced-motion: no-preference) {
+  .sc-rain.on { animation: hujan 0.7s linear infinite; }
+  @keyframes hujan { from { transform: translate(6px, -16px); } to { transform: translate(0, 0); } }
+}
+
+/* Kartu petunjuk sambung */
+.setup .steps { margin: 16px 0; padding-left: 22px; display: grid; gap: 10px; font-size: 15px; letter-spacing: -0.24px; }
+.setup a { color: var(--primary); }
+code { font: 13px/1.4 ui-monospace, "SF Mono", Menlo, Consolas, monospace; padding: 1px 6px; border-radius: 5px; background: var(--chip); letter-spacing: 0; }
+
+@media (max-width: 833px) {
+  .scene { flex-basis: 100%; max-width: 320px; margin: 0 auto; }
+  .hero { padding: 32px 24px; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .hero { --sc-ground: #4a4034; --sc-wet: #8a6a3a; --sc-line: #f5f5f7; --sc-box: #2c2c2e; }
 }
