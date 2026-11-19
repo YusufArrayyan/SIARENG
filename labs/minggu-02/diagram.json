@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "author": "Tim PjBL Informatika UNIB - Lab 1",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-esp32-devkit-v1", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-dht22", "id": "dht1", "top": -50, "left": -150, "attrs": { "temperature": "27", "humidity": "70" } },
+    { "type": "wokwi-potentiometer", "id": "potSoil", "top": 90, "left": -150, "attrs": {} },
+    { "type": "wokwi-pushbutton", "id": "btnMode", "top": 190, "left": -150, "attrs": { "color": "yellow" } },
+    { "type": "wokwi-relay-module", "id": "relayPump", "top": -30, "left": 170, "attrs": {} },
+    { "type": "wokwi-led", "id": "ledPump", "top": 70, "left": 180, "attrs": { "color": "green" } },
+    { "type": "wokwi-resistor", "id": "rPump", "top": 115, "left": 170, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "ledFanPwm", "top": 160, "left": 180, "attrs": { "color": "blue" } },
+    { "type": "wokwi-resistor", "id": "rFan", "top": 205, "left": 170, "attrs": { "value": "220" } }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "esp:3V3", "red", [] ],
+    [ "dht1:GND", "esp:GND.1", "black", [] ],
+    [ "dht1:SDA", "esp:D4", "blue", [] ],
+    [ "potSoil:VCC", "esp:3V3", "red", [] ],
+    [ "potSoil:GND", "esp:GND.1", "black", [] ],
+    [ "potSoil:SIG", "esp:D34", "purple", [] ],
+    [ "btnMode:1.l", "esp:D15", "gold", [] ],
+    [ "btnMode:2.l", "esp:GND.1", "black", [] ],
+    [ "relayPump:VCC", "esp:VIN", "red", [] ],
+    [ "relayPump:GND", "esp:GND.2", "black", [] ],
+    [ "relayPump:IN", "esp:D26", "green", [] ],
+    [ "esp:D26", "rPump:1", "green", [] ],
+    [ "rPump:2", "ledPump:A", "green", [] ],
+    [ "ledPump:C", "esp:GND.2", "black", [] ],
+    [ "esp:D18", "rFan:1", "cyan", [] ],
+    [ "rFan:2", "ledFanPwm:A", "cyan", [] ],
+    [ "ledFanPwm:C", "esp:GND.2", "black", [] ]
+  ]
+}

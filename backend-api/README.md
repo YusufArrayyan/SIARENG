@@ -19,6 +19,8 @@ python -m venv .venv
 
 **Tanpa alat (mode demo):** buka `dashboard/index.html` langsung di browser, atau jalankan backend lalu buka `http://localhost:8000/?demo`. Gunakan panel "Kendali demo" untuk meniru kondisi lereng.
 
+**Cara tercepat (Windows):** klik ganda `jalankan.bat`. Skrip menyiapkan `.venv` sekali, mencari port ESP32 sendiri (`SERIAL_PORT=auto`), menampilkan IP laptop, lalu membuka dashboard.
+
 **Dengan alat lewat USB:** colokkan ESP32, cari nomor port-nya (Windows: Device Manager → Ports, misalnya `COM5`), tutup Serial Monitor PlatformIO (port hanya bisa dipakai satu program), lalu:
 
 ```bash
@@ -28,13 +30,33 @@ SERIAL_PORT=COM5 .venv/Scripts/python -m uvicorn app:app --host 0.0.0.0 --port 8
 
 Buka `http://localhost:8000`. Laptop dan HP di WiFi yang sama bisa membuka `http://<IP-laptop>:8000`.
 
-**Dengan alat lewat WiFi:** set `KIRIM_WIFI 1` di firmware dan isi `firmware/include/secrets.h`. Jalankan perintah yang sama, `SERIAL_PORT` boleh dikosongkan. Langkah lengkap ada di [`docs/panduan-pemula.md`](../docs/panduan-pemula.md).
+**Dengan simulator Wokwi:** di folder `firmware/`, build target khusus simulator:
+
+```bash
+pio run -e wokwi
+```
+
+Jalankan gateway privat Wokwi di komputer (gateway publik tidak dapat mengakses server lokal), lalu dari folder `backend-api/` jalankan backend:
+
+```bash
+.venv/Scripts/python -m uvicorn app:app --host 0.0.0.0 --port 8000
+```
+
+Buka `http://localhost:8000` untuk dashboard, kemudian di simulator pilih **F1 → Enable Private Wokwi IoT Gateway** dan mulai ulang simulasi. Target `wokwi` memakai jaringan virtual `Wokwi-GUEST` dan mengirim ke `host.wokwi.internal:8000`; dashboard akan beralih ke data langsung saat telemetri pertama diterima. Target ini tanpa API key, jadi gunakan hanya dengan gateway privat di komputer sendiri.
+
+**Dengan ESP32 fisik lewat WiFi:** salin `firmware/include/secrets.example.h` menjadi `firmware/include/secrets.h`, isi SSID/kata sandi WiFi dan IP laptop untuk `SERVER_URL`, lalu build dari folder `firmware/`:
+
+```bash
+pio run -e esp32doit-devkit-v1-wifi
+```
+
+Jalankan backend dengan perintah Uvicorn di atas dan pastikan laptop serta ESP32 ada di jaringan lokal yang sama. Bila `API_KEY` backend diaktifkan, isi kunci yang sama di `secrets.h`. Target default `esp32doit-devkit-v1` tetap untuk koneksi USB/Serial. Langkah lengkap ada di [`docs/panduan-pemula.md`](../docs/panduan-pemula.md).
 
 ## Pengaturan (environment variable, semua opsional)
 
 | Nama | Fungsi |
 |---|---|
-| `SERIAL_PORT`, `SERIAL_BAUD` | Port USB ESP32, misalnya `COM5`. Baud bawaan 115200 |
+| `SERIAL_PORT`, `SERIAL_BAUD` | Port USB ESP32, misalnya `COM5`, atau `auto` untuk mencari chip CP210x/CH340 sendiri. Baud bawaan 115200 |
 | `API_KEY` | Bila diisi, `POST /api/telemetry` wajib membawa header `X-API-Key` yang sama |
 | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` | Kirim pesan Telegram saat status berubah dan saat alat diam lebih dari 60 detik |
 | `DB_PATH`, `RETENSI_HARI` | Lokasi SQLite dan lama data disimpan (bawaan 30 hari) |

@@ -75,11 +75,11 @@ Tujuannya memastikan semua komponen hidup dan firmware berjalan di perangkat asl
 | Modul sensor hujan (komparator) | VCC / GND | 3V3 / GND |
 | | AO (bukan DO) | GPIO 35 |
 | | 2 pin ke panel | ke panel hujan |
-| Buzzer pasif | S (sinyal) / – | GPIO 25 / GND |
-| | + (bila ada) | 3V3 |
-| LED hijau | anoda (kaki panjang) | resistor 220 Ω, lalu GPIO 26 |
-| LED kuning | anoda | resistor 220 Ω, lalu GPIO 27 |
-| LED merah | anoda | resistor 220 Ω, lalu GPIO 14 |
+| Buzzer aktif (yang dibeli) | + (kaki panjang) / – | GPIO 25 / GND |
+| Buzzer pasif (alternatif) | S (sinyal) / – , + bila ada | GPIO 25 / GND, 3V3 |
+| LED hijau | anoda (kaki panjang) | resistor 200–330 Ω, lalu GPIO 26 |
+| LED kuning | anoda | resistor 200–330 Ω, lalu GPIO 27 |
+| LED merah | anoda | resistor 200–330 Ω, lalu GPIO 14 |
 | Ketiga LED | katoda (kaki pendek) | GND |
 | Tombol kalibrasi | kaki 1 / kaki 2 | GPIO 15 / GND |
 
@@ -87,9 +87,9 @@ GPIO 34 dan 35 hanya bisa dipakai sebagai input. Karena itu keduanya dipakai unt
 
 ### 1.2 Upload firmware
 
-1. Buka `firmware/include/config.h`, ubah `#define SIMULASI 1` menjadi `0`. Biarkan `BUZZER_PASIF 1`.
-2. Sambungkan ESP32 ke laptop dengan kabel data micro USB.
-3. Di VS Code: PlatformIO → **Upload**, lalu **Monitor** (115200 baud).
+1. Pilih target **`env:alat`** di PlatformIO (mode sensor asli + buzzer aktif sudah diatur, `config.h` tidak perlu diubah). Bila memakai buzzer pasif, ubah `-DBUZZER_PASIF=0` menjadi `1` di `platformio.ini`.
+2. Sambungkan ESP32 ke laptop dengan kabel data USB.
+3. Di VS Code: PlatformIO → **Upload**, lalu **Monitor** (115200 baud). Kalibrasi sensor cukup lewat perintah Serial Monitor, lihat `docs/sambungkan-alat.md` bagian 5.
 4. Kalau upload gagal di tengah "Connecting...", tahan tombol **BOOT** di ESP32 sampai upload mulai berjalan.
 
 ### 1.3 Uji lolos jika

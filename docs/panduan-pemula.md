@@ -109,11 +109,12 @@ Isi folder `SIARENG` yang perlu kamu tahu:
 ### 3a. Simulasi alat di Wokwi
 
 1. Di VS Code, pilih File → Open Folder, lalu buka folder **`SIARENG/firmware`** (bukan folder `SIARENG`).
-2. Klik ikon PlatformIO → **Build**. Proses pertama cukup lama karena mengunduh perkakas ESP32.
+2. Buka terminal di folder `firmware/` dan jalankan `pio run -e wokwi`. Proses pertama cukup lama karena mengunduh perkakas ESP32.
 3. Tekan `F1` → `Wokwi: Start Simulator`.
 4. Putar potensiometer dan geser slider MPU6050 sesuai skenario di [`simulasi-demo.md`](simulasi-demo.md).
 
 **Berhasil kalau:** LED hijau menyala di simulasi, dan saat tanah dibuat jenuh sambil kemiringan digeser, LED merah berkedip.
+Untuk mengirim data Wokwi ke dashboard live, ikuti bagian **Dengan simulator Wokwi** di [`../backend-api/README.md`](../backend-api/README.md).
 
 ### 3b. Dashboard mode demo
 
@@ -142,7 +143,7 @@ Kunci supaya tidak bingung: **pasang satu komponen, uji, baru pasang berikutnya.
 
 1. Tancapkan ESP32 di breadboard, melintang di atas celah tengah. Kalau papanmu versi lebar (38 pin) sehingga satu sisi tidak menyisakan lubang, tidak apa-apa: pin di sisi itu disambung dengan kabel jumper **male-female** langsung ke kaki ESP32.
 2. Sambungkan pin `3V3` ke jalur merah, dan pin `GND` ke jalur biru.
-3. Buka `firmware/include/config.h`, ubah `#define SIMULASI 1` menjadi `0`.
+3. Di status bar PlatformIO, pilih target **`env:alat`** (sensor asli + buzzer aktif, tanpa mengubah `config.h`).
 4. Colokkan kabel USB ke laptop. Di VS Code (folder `firmware` terbuka), klik PlatformIO → **Upload**.
 5. Kalau upload berhenti di tulisan `Connecting.....`, tahan tombol **BOOT** di ESP32 sampai proses berjalan.
 6. Klik PlatformIO → **Monitor**.
@@ -166,7 +167,7 @@ Colok USB lagi, lalu tekan tombol **EN** (atau RST) di ESP32 untuk memulai ulang
 
 ### 5.3 Tiga LED
 
-Untuk setiap LED: kaki **panjang** ke resistor (220 Ω atau 330 Ω), ujung resistor lainnya ke GPIO. Kaki **pendek** ke jalur biru (GND).
+Untuk setiap LED: kaki **panjang** ke resistor (200 Ω, 220 Ω, atau 330 Ω), ujung resistor lainnya ke GPIO. Kaki **pendek** ke jalur biru (GND).
 
 | LED | GPIO |
 |---|---|
@@ -285,7 +286,7 @@ Syaratnya: ESP32 dan laptop tersambung ke **WiFi yang sama**, dan WiFi itu **2,4
 
    File `secrets.h` tidak ikut ter-commit ke GitHub, jadi kata sandi WiFi tidak tersebar.
 
-3. Di `config.h`, ubah `#define KIRIM_WIFI 0` menjadi `1`, lalu Upload.
+3. Untuk alat asli, Build dan Upload dengan target `alat-wifi` (`pio run -e alat-wifi -t upload`). Target `esp32doit-devkit-v1-wifi` hanya untuk simulasi potensiometer.
 4. Jalankan backend seperti di Langkah 7. Tanpa kabel USB, bagian `SERIAL_PORT=COM5` boleh dihapus.
 5. Saat pertama dijalankan, Windows akan bertanya soal firewall. Pilih **Allow access**.
 

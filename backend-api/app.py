@@ -1,7 +1,7 @@
 """SIARENG backend: penerima telemetri, penyimpanan, WebSocket dashboard, dan peringatan Telegram.
 
 Sumber data (boleh lebih dari satu sekaligus):
-  1. Serial USB : set SERIAL_PORT=COM5 (Windows) atau /dev/ttyUSB0 (Linux).
+  1. Serial USB : set SERIAL_PORT=auto (cari ESP32 sendiri), COM5 (Windows), atau /dev/ttyUSB0 (Linux).
   2. WiFi       : ESP32 mengirim POST /api/telemetry (firmware dengan KIRIM_WIFI = 1).
 
 Pengaturan lewat environment variable (semua opsional):
@@ -38,6 +38,9 @@ DASHBOARD = BASE.parent / "dashboard"
 DB_PATH = Path(os.getenv("DB_PATH", BASE / "siareng.db"))
 SERIAL_PORT = os.getenv("SERIAL_PORT", "")
 SERIAL_BAUD = int(os.getenv("SERIAL_BAUD", "115200"))
+PORT_AKTIF: dict[str, str | None] = {"nama": None}   # port yang sedang dibaca (berguna untuk mode auto)
+# Chip USB-serial yang umum di papan ESP32: CP210x, CH340/CH9102, FTDI
+VID_ESP32 = {0x10C4, 0x1A86, 0x0403}
 API_KEY = os.getenv("API_KEY", "")
 TG_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TG_CHAT = os.getenv("TELEGRAM_CHAT_ID", "")
@@ -170,13 +173,35 @@ HUB = Hub()
 
 
 # ----------------------------------------------------------------- pembaca serial
+def cari_port() -> str | None:
+    """Mode SERIAL_PORT=auto: pilih port pertama yang chip USB-nya biasa dipakai ESP32."""
+    from serial.tools import list_ports
+
+    for p in list_ports.comports():
+        if p.vid in VID_ESP32:
+            return p.device
+    return None
+
+
 def baca_serial(stop: threading.Event) -> None:
     import serial  # pyserial
 
+    sudah_lapor = False
     while not stop.is_set():
+        nama = SERIAL_PORT
+        if SERIAL_PORT.lower() == "auto":
+            nama = cari_port()
+            if not nama:
+                if not sudah_lapor:
+                    print("[serial] ESP32 belum tercolok. Menunggu... (cek kabel data dan driver CP210x)")
+                    sudah_lapor = True
+                stop.wait(3)
+                continue
+        sudah_lapor = False
         try:
-            with serial.Serial(SERIAL_PORT, SERIAL_BAUD, timeout=1) as port:
-                print(f"[serial] terhubung ke {SERIAL_PORT}")
+            with serial.Serial(nama, SERIAL_BAUD, timeout=1) as port:
+                PORT_AKTIF["nama"] = nama
+                print(f"[serial] terhubung ke {nama}")
                 while not stop.is_set():
                     baris = port.readline().decode("utf-8", errors="ignore").strip()
                     if not baris.startswith("{"):
@@ -185,11 +210,13 @@ def baca_serial(stop: threading.Event) -> None:
                         msg = json.loads(baris)
                     except json.JSONDecodeError:
                         continue
-                    if msg.get("event") in ("wifi", "kirim_gagal"):
+                    if msg.get("event") in ("wifi", "kirim_gagal", "bantuan"):
                         continue          # catatan diagnostik firmware, bukan data lereng
                     HUB.terima(msg, "serial")
-        except Exception as e:  # port dicabut, salah nama port, dsb.
-            print(f"[serial] {SERIAL_PORT} belum bisa dibuka ({e}). Coba lagi 3 detik lagi.")
+        except Exception as e:  # port dicabut, salah nama port, dipakai Serial Monitor, dsb.
+            PORT_AKTIF["nama"] = None
+            print(f"[serial] {nama} belum bisa dibuka ({e}). Tutup Serial Monitor bila masih terbuka. "
+                  "Coba lagi 3 detik lagi.")
             stop.wait(3)
 
 
@@ -236,7 +263,7 @@ async def tanpa_cache(request: Request, call_next):
 
 @app.get("/api/health", summary="Cek server")
 def health() -> dict:
-    return {"ok": True, "serial": SERIAL_PORT or None, "kunci_api": bool(API_KEY),
+    return {"ok": True, "serial": SERIAL_PORT or None, "serial_aktif": PORT_AKTIF["nama"], "kunci_api": bool(API_KEY),
             "telegram": telegram_aktif(), "clients": len(HUB.clients)}
 
 

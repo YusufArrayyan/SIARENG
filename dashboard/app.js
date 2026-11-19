@@ -133,6 +133,9 @@ function teksEvent(d) {
     case "baseline_siap": return { level: "info", text: "Patokan kemiringan siap. Pemantauan dimulai." };
     case "boot": return { level: "info", text: "Perangkat menyala." };
     case "error": return { level: "bahaya", text: d.msg || "Perangkat melaporkan galat." };
+    case "peringatan": return { level: "waspada", text: d.msg || "Perangkat memberi peringatan." };
+    case "mpu_tersambung": return { level: "info", text: d.msg || "Sensor kemiringan tersambung kembali." };
+    case "kalibrasi": return { level: "info", text: `Kalibrasi sensor: ${d.msg || "tersimpan"}.` };
     default: return null;
   }
 }

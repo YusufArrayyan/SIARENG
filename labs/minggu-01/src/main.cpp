@@ -78,7 +78,7 @@ void loop() {
   statusTombolSebelumnya = statusTombol;
 
   // 2. Pembacaan sensor berkala: Mode Blocking vs Non-Blocking
-#if MODE_NON_BLOCKING == 0
+#if MODE_NON_BLOCKING == 1
   delay(intervalTelemetriMs);  // BLOCKING: CPU berhenti total selama interval!
   bacaDanKirim();
 #else

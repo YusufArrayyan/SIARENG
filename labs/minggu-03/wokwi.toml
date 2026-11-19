@@ -1,0 +1,5 @@
+[wokwi]
+version = 1
+; Ganti "esp32doit-devkit-v1" menjadi "scanner" untuk mensimulasikan I2C Scanner.
+firmware = '.pio/build/esp32doit-devkit-v1/firmware.bin'
+elf = '.pio/build/esp32doit-devkit-v1/firmware.elf'
