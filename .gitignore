@@ -8,3 +8,4 @@ test_host/test_logic
 *.exe
 ~$*
 *.db
+node_modules/

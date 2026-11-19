@@ -14,7 +14,12 @@ constexpr size_t PANJANG_PESAN = 320;   // satu baris JSON firmware < 300 byte
 
 #if KIRIM_WIFI
 
-#if __has_include("secrets.h")
+#if defined(WOKWI_SIMULATOR)
+  #define WIFI_SSID "Wokwi-GUEST"
+  #define WIFI_PASS ""
+  #define SERVER_URL "http://host.wokwi.internal:8000/api/telemetry"
+  #define API_KEY ""
+#elif __has_include("secrets.h")
   #include "secrets.h"
 #else
   #error "KIRIM_WIFI = 1 tetapi include/secrets.h belum ada. Salin secrets.example.h menjadi secrets.h lalu isi WiFi dan alamat server."
@@ -40,7 +45,11 @@ static void taskKirim(void*) {
       if (millis() - tCobaWifi >= JEDA_SAMBUNG_ULANG_MS || tCobaWifi == 0) {
         tCobaWifi = millis();
         WiFi.disconnect();
+#if defined(WOKWI_SIMULATOR)
+        WiFi.begin(WIFI_SSID, WIFI_PASS, 6);
+#else
         WiFi.begin(WIFI_SSID, WIFI_PASS);
+#endif
       }
       vTaskDelay(pdMS_TO_TICKS(500));
       continue;

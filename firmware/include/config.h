@@ -15,8 +15,8 @@
 #define BUZZER_PASIF 1
 #endif
 
-// 1 = kirim data ke backend lewat WiFi (isi dulu include/secrets.h)
-// 0 = hanya lewat kabel USB (Serial). Alarm lokal bekerja di kedua mode.
+// Target "wokwi" dan "esp32doit-devkit-v1-wifi" mengaktifkan WiFi lewat build flags.
+// Target default memakai USB (Serial). Alarm lokal bekerja di semua mode.
 #ifndef KIRIM_WIFI
 #define KIRIM_WIFI 0
 #endif
